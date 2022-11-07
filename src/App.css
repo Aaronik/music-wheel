@@ -1,10 +1,70 @@
-.App {
-  text-align: center;
+body {
+  background: black;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.App {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#wheel-container {
+  position: relative;
+  left: 20%;
+  width: 80%;
+}
+
+.overlapped {
+  position: absolute;
+  left: 0;
+}
+
+.rotate-buttons {
+  display: flex;
+  flex-direction: row;
+  z-index: 999; /* so they can be clicked even when corner of images are above them */
+}
+
+.rotate-buttons div {
+  cursor: pointer;
+}
+
+#note-wheel-buttons {
+  color: white;
+}
+
+#note-wheel-buttons div {
+  font-size: 36px;
+}
+
+#line-wheel-buttons {
+  color: white;
+}
+
+#line-wheel-buttons div {
+  font-size: 36px;
+}
+
+#quality-wheel {
+
+}
+
+#note-wheel {
+  margin-top: -2px;
+}
+
+#line-wheel {
+  margin-top: 4px;
+  margin-left: 2px;
+}
+
+.rotatable {
+  transition: transform 0.3s
+}
+
+.hidden {
+  display: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
