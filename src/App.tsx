@@ -10,6 +10,12 @@ const NOTES = [
 
 const synth = new Tone.Synth().toDestination()
 
+// TODO
+// * Legend always visible on top
+// * Play row
+// * modal background
+// * Rotation degrees modulo 360
+
 function App() {
 
   const [noteRotation, setNoteRotation] = useState(0)
@@ -32,32 +38,35 @@ function App() {
   //   })
   // }
 
-  let legendClassName = 'modal'
-  if (!isLegendVisible) legendClassName += ' hidden'
+  // let legendClassName = 'modal'
+  // if (!isLegendVisible) legendClassName += ' hidden'
   let instructionsClassName = 'modal'
   if (!isInstructionsVisible) instructionsClassName += ' hidden'
 
 
   return (
     <div className="App">
-      <div id='legend' onClick={() => setLegendVisible(false)} className={legendClassName}><img src='legend.png' /></div>
+      { /* <div id='legend' onClick={() => setLegendVisible(false)} className={legendClassName}><img src='legend.png' /></div> */ }
+      <div id='legend'><img src='legend.png' /></div>
       <div id='instructions' onClick={() => setInstructionsVisible(false)} className={instructionsClassName}><img src='instructions.png' /></div>
       <div id='help-buttons'>
-        <h2 onClick={() => setLegendVisible(!isLegendVisible)}>Show Legend</h2>
-        <h2 onClick={() => setInstructionsVisible(!isInstructionsVisible)}>Show Instructions</h2>
+        {/* <h2 onClick={() => setLegendVisible(!isLegendVisible)}>Show Legend</h2> */ }
+        <h2 onClick={() => setInstructionsVisible(!isInstructionsVisible)}>?</h2>
       </div>
-      <div id='note-wheel-buttons' className='rotate-buttons'>
-        <h2>Note Rotation</h2>
-        <div>
-          <div onClick={incrementNoteRotation}>⇧</div>
-          <div onClick={decrementNoteRotation}>⇩</div>
+      <div id='wheel-buttons'>
+        <div id='note-wheel-buttons' className='rotate-buttons'>
+          <h2>Select Key</h2>
+          <div>
+            <div onClick={incrementNoteRotation}>⇧</div>
+            <div onClick={decrementNoteRotation}>⇩</div>
+          </div>
         </div>
-      </div>
-      <div id='line-wheel-buttons' className='rotate-buttons'>
-        <h2>Color Rotation</h2>
-        <div>
-          <div onClick={incrementLineRotation}>⇧</div>
-          <div onClick={decrementLineRotation}>⇩</div>
+        <div id='line-wheel-buttons' className='rotate-buttons'>
+          <h2>Select Mode</h2>
+          <div>
+            <div onClick={incrementLineRotation}>⇧</div>
+            <div onClick={decrementLineRotation}>⇩</div>
+          </div>
         </div>
       </div>
       <div id='wheel-container'>

@@ -10,9 +10,24 @@ body {
   justify-content: space-between;
 }
 
-#help-buttons {
+#help-buttons h2 {
   cursor: pointer;
-  /* font-size: 24px; */
+  font-size: 36px;
+  position: fixed;
+  bottom: 5%;
+  right: 5%;
+  border-radius: 100%;
+  background-color: purple;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  transition: filter 0.2s;
+}
+
+#help-buttons h2:hover {
+  filter: brightness(150%);
 }
 
 #wheel-container {
@@ -29,39 +44,36 @@ body {
 .rotate-buttons {
   display: flex;
   flex-direction: row;
-  z-index: 999; /* so they can be clicked even when corner of images are above them */
+  z-index: 10; /* so they can be clicked even when corner of images are above them */
 }
 
 .rotate-buttons div {
   cursor: pointer;
 }
 
-#note-wheel-buttons {
+#wheel-buttons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+  width: 50%;
 }
+
+#note-wheel-buttons { }
 
 #note-wheel-buttons div {
   font-size: 36px;
 }
 
-#line-wheel-buttons {
-}
+#line-wheel-buttons { }
 
 #line-wheel-buttons div {
   font-size: 36px;
 }
 
-#quality-wheel {
-
-}
-
-#note-wheel {
-  margin-top: -2px;
-}
-
-#line-wheel {
-  margin-top: 4px;
-  margin-left: 2px;
-}
+#quality-wheel { }
+#note-wheel { }
+#line-wheel { }
 
 .rotatable {
   transition: transform 0.3s
@@ -69,7 +81,7 @@ body {
 
 .modal {
   position: absolute;
-  z-index: 9999;
+  z-index: 20;
   left: 30%;
   top: 20%;
 }
