@@ -47,32 +47,37 @@ function App() {
   return (
     <div className="App">
       { /* <div id='legend' onClick={() => setLegendVisible(false)} className={legendClassName}><img src='legend.png' /></div> */ }
-      <div id='legend'><img src='legend.png' /></div>
+      <div id='legend-container'><img src='legend.png' width={'80%'} /></div>
       <div id='instructions' onClick={() => setInstructionsVisible(false)} className={instructionsClassName}><img src='instructions.png' /></div>
       <div id='help-buttons'>
         {/* <h2 onClick={() => setLegendVisible(!isLegendVisible)}>Show Legend</h2> */ }
         <h2 onClick={() => setInstructionsVisible(!isInstructionsVisible)}>?</h2>
       </div>
-      <div id='wheel-buttons'>
+      <div id='wheel-buttons-container'>
         <div id='note-wheel-buttons' className='rotate-buttons'>
           <h2>Select Key</h2>
           <div>
-            <div onClick={incrementNoteRotation}>⇧</div>
-            <div onClick={decrementNoteRotation}>⇩</div>
+            <button onClick={incrementNoteRotation}>⇧</button>
+            <button onClick={decrementNoteRotation}>⇩</button>
           </div>
         </div>
         <div id='line-wheel-buttons' className='rotate-buttons'>
           <h2>Select Mode</h2>
           <div>
-            <div onClick={incrementLineRotation}>⇧</div>
-            <div onClick={decrementLineRotation}>⇩</div>
+            <button onClick={incrementLineRotation}>⇧</button>
+            <button onClick={decrementLineRotation}>⇩</button>
           </div>
         </div>
       </div>
+      <div id='play-buttons-container'>
+        <button onClick={() => {}}>🎧 Scale</button>
+        <button onClick={() => {}}>🎧 Triad</button>
+        <button onClick={() => {}}>🎧 Seventh</button>
+      </div>
       <div id='wheel-container'>
-        <img id='quality-wheel' className='overlapped' src='quality-wheel.png' />
-        <img style={noteRotationStyle} id='note-wheel' className='overlapped rotatable' src='note-wheel.png' />
-        <img style={lineRotationStyle} id='line-wheel' className='overlapped rotatable' src='line-wheel.png' />
+        <img id='quality-wheel' className='wheel' src='quality-wheel.png' />
+        <img style={noteRotationStyle} id='note-wheel' className='wheel rotatable' src='note-wheel.png' />
+        <img style={lineRotationStyle} id='line-wheel' className='wheel rotatable' src='line-wheel.png' />
       </div>
     </div>
   )
