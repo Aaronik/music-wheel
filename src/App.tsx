@@ -8,9 +8,15 @@ const NOTES = [
   'C6'
 ]
 
+// Just stepping up, this will help us to build up our scale down the line
+const CHROMATIC_SCALE: number[] = []
+for (let i = 0; i < 100; i++) {
+  CHROMATIC_SCALE.push(i)
+}
+
 // TODO
 // * modal background
-// * Rotating notes down leaves undefinedes in scale
+// * Rotating notes down leaves undefinedes in scale, also up too far does
 
 function App() {
 
@@ -25,20 +31,23 @@ function App() {
 
   // Basically whole step/half step
   const scaleSteps = [2, 2, 1, 2, 2, 2, 1, 2] // Starting on Ionian
-  const chromaticScale = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 
   // Translate to the correct scaleSteps for the mode we're in
   for (let i = 0; i < modeIndex; i++) { // TODO Maybe change modeIndex to modeRotationIndex
     scaleSteps.push(scaleSteps.shift() as number)
   }
 
+  console.log("scaleSteps:", scaleSteps)
+
   // Generate the scale degrees we're concerned with by applying scaleSteps to chromaticScale
   const scaleDegrees: number[] = []
   let currentPosition = 0
   for (let step of scaleSteps) {
-    scaleDegrees.push(chromaticScale[currentPosition])
+    scaleDegrees.push(CHROMATIC_SCALE[currentPosition])
     currentPosition += step
   }
+
+  console.log("scaleDegrees:", scaleDegrees)
 
   // See, if we just did mode index like note index, the modes would rotate by their 30 degrees
   // and look fine, but 5 times, the root note _would not be on a note_, and that's semantically
@@ -49,23 +58,22 @@ function App() {
   const noteRotationStyle = { transform: `rotate(${(0 - noteIndex) * 30}deg)` }
   const modeRotationStyle = { transform: `rotate(${(0 - modeRotationIndex) * 30}deg)` }
 
-  // const rootNote = NOTES[noteIndex % 12]
+  // TODO Why not just do a a mask for the mode. Start with [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1] then shift it all up
+  // Notes rotate where we start, mode is how much we shift that thing. For each primary mode index, we shift that once. Easy!
+
   const notes: string[] = []
   for (const i of scaleDegrees) {
     notes.push(NOTES[i + noteIndex])
   }
   console.log('scale: ', notes)
 
-  const playNotes = async (toPlay: string[], shouldPlayTogether = false) => {
+  const playNotes = async (toPlay: string[], shouldPlayTogetherAfter = false) => {
     await Tone.start()
-
     const synth = new Tone.PolySynth(Tone.Synth).toDestination()
-
     toPlay.forEach((note, index) => {
       synth.triggerAttackRelease(note, "8n", Tone.now() + (index / 3))
     })
-
-    if (shouldPlayTogether) {
+    if (shouldPlayTogetherAfter) {
       synth.triggerAttackRelease(toPlay, "4n", Tone.now() + ((toPlay.length + 0.5) / 3))
     }
   }
