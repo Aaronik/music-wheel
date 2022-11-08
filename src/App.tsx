@@ -14,10 +14,6 @@ for (let i = 0; i < 100; i++) {
   CHROMATIC_SCALE.push(i)
 }
 
-// TODO
-// * modal background
-// * Rotating notes down leaves undefinedes in scale, also up too far does
-
 function App() {
 
   const [noteIndex, setNoteIndex] = useState(0)
