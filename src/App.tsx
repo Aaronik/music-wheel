@@ -25,16 +25,14 @@ function App() {
   const incrementModeRotation = () => setModeIndex(modeIndex + 1)
   const decrementModeRotation = () => setModeIndex(modeIndex - 1)
 
-  // TODO noteIndexVisual vs. noteIndexMathematical?
-
   // See, if we just did mode index like note index, the modes would rotate by their 30 degrees
   // and look fine, but 5 times, the root note _would not be on a note_, and that's semantically
   // undefined. So by having this secondary index, we can skip indices that are undesirable.
   const ionianScaleDegrees = [0, 2, 4, 5, 7, 9, 11] // B/c this is our starting place, all rotations are relative to the ionian mode
   const modeRotationIndex = ionianScaleDegrees[modeIndex % ionianScaleDegrees.length]
 
-  const noteRotationStyle = { transform: `rotate(${(0 - noteIndex) * 30}deg)` }
-  const modeRotationStyle = { transform: `rotate(${(0 - modeRotationIndex) * 30}deg)` }
+  const noteWheelStyle = { transform: `rotate(${(0 - noteIndex) * 30}deg)` }
+  const modeWheelStyle = { transform: `rotate(${(0 - modeRotationIndex) * 30}deg)` }
 
   // Create a mask we can apply to our notes to get the ones we want
   // Starts with Ionian because that's our wheel's starting position
@@ -53,8 +51,6 @@ function App() {
 
   // Get all of the notes starting at our root note
   const chromaticNotes = NOTES.slice(boundedNoteIndex, boundedNoteIndex + 13)
-  console.log("modeMask:", modeMask)
-  console.log("chromaticNotes:", chromaticNotes)
   const notes = chromaticNotes.reduce((notes, note, index) => {
     const bitMask = modeMask[index]
     if (bitMask) { notes.push(note) }
@@ -91,7 +87,6 @@ function App() {
   let instructionsClassName = 'modal'
   if (!isInstructionsVisible) instructionsClassName += ' hidden'
 
-
   return (
     <div className="App">
       <div id='legend-container'><img src='legend.png' width={'80%'} /></div>
@@ -100,7 +95,7 @@ function App() {
         <h2 onClick={() => setInstructionsVisible(!isInstructionsVisible)}>?</h2>
       </div>
       <div id='wheel-buttons-container'>
-        <div id='note-wheel-buttons' className='rotate-buttons'>
+        <div id='note-wheel-buttons' className='rotate-buttons' style={{ marginRight: '10px' }}>
           <h2>Select Key</h2>
           <div>
             <button onClick={incrementNoteRotation}>⇧</button>
@@ -122,8 +117,8 @@ function App() {
       </div>
       <div id='wheel-container'>
         <img id='quality-wheel' className='wheel' src='quality-wheel.png' />
-        <img style={noteRotationStyle} id='note-wheel' className='wheel rotatable' src='note-wheel.png' />
-        <img style={modeRotationStyle} id='mode-wheel' className='wheel rotatable' src='mode-wheel.png' />
+        <img style={noteWheelStyle} id='note-wheel' className='wheel rotatable' src='note-wheel.png' />
+        <img style={modeWheelStyle} id='mode-wheel' className='wheel rotatable' src='mode-wheel.png' />
       </div>
     </div>
   )
