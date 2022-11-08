@@ -25,25 +25,7 @@ function App() {
   const incrementModeRotation = () => setModeIndex(modeIndex + 1)
   const decrementModeRotation = () => setModeIndex(modeIndex - 1)
 
-  // Basically whole step/half step
-  const scaleSteps = [2, 2, 1, 2, 2, 2, 1, 2] // Starting on Ionian
-
-  // Translate to the correct scaleSteps for the mode we're in
-  for (let i = 0; i < modeIndex; i++) { // TODO Maybe change modeIndex to modeRotationIndex
-    scaleSteps.push(scaleSteps.shift() as number)
-  }
-
-  console.log("scaleSteps:", scaleSteps)
-
-  // Generate the scale degrees we're concerned with by applying scaleSteps to chromaticScale
-  const scaleDegrees: number[] = []
-  let currentPosition = 0
-  for (let step of scaleSteps) {
-    scaleDegrees.push(CHROMATIC_SCALE[currentPosition])
-    currentPosition += step
-  }
-
-  console.log("scaleDegrees:", scaleDegrees)
+  // TODO noteIndexVisual vs. noteIndexMathematical?
 
   // See, if we just did mode index like note index, the modes would rotate by their 30 degrees
   // and look fine, but 5 times, the root note _would not be on a note_, and that's semantically
@@ -54,13 +36,31 @@ function App() {
   const noteRotationStyle = { transform: `rotate(${(0 - noteIndex) * 30}deg)` }
   const modeRotationStyle = { transform: `rotate(${(0 - modeRotationIndex) * 30}deg)` }
 
-  // TODO Why not just do a a mask for the mode. Start with [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1] then shift it all up
-  // Notes rotate where we start, mode is how much we shift that thing. For each primary mode index, we shift that once. Easy!
+  // Create a mask we can apply to our notes to get the ones we want
+  // Starts with Ionian because that's our wheel's starting position
+  const modeMask = [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]
 
-  const notes: string[] = []
-  for (const i of scaleDegrees) {
-    notes.push(NOTES[i + noteIndex])
+  // Translate our mode mask so it's the right mode
+  for (let i = 0; i < modeRotationIndex; i++) {
+    modeMask.push(modeMask.shift() as number)
   }
+
+  // We always want to play the root note at the end
+  modeMask.push(1)
+
+  // Get a bounded index so we don't run out of notes from our NOTES array
+  const boundedNoteIndex = (noteIndex % 12) < 0 ? 12 + (noteIndex % 12) : (noteIndex % 12)
+
+  // Get all of the notes starting at our root note
+  const chromaticNotes = NOTES.slice(boundedNoteIndex, boundedNoteIndex + 13)
+  console.log("modeMask:", modeMask)
+  console.log("chromaticNotes:", chromaticNotes)
+  const notes = chromaticNotes.reduce((notes, note, index) => {
+    const bitMask = modeMask[index]
+    if (bitMask) { notes.push(note) }
+    return notes
+  }, [] as string[])
+
   console.log('scale: ', notes)
 
   const playNotes = async (toPlay: string[], shouldPlayTogetherAfter = false) => {
@@ -70,7 +70,7 @@ function App() {
       synth.triggerAttackRelease(note, "8n", Tone.now() + (index / 3))
     })
     if (shouldPlayTogetherAfter) {
-      synth.triggerAttackRelease(toPlay, "4n", Tone.now() + ((toPlay.length + 0.5) / 3))
+      synth.triggerAttackRelease(toPlay, "2n", Tone.now() + ((toPlay.length + 0.5) / 3))
     }
   }
 
