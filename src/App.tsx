@@ -29,7 +29,8 @@ function App() {
   // and look fine, but 5 times, the root note _would not be on a note_, and that's semantically
   // undefined. So by having this secondary index, we can skip indices that are undesirable.
   const ionianScaleDegrees = [0, 2, 4, 5, 7, 9, 11] // B/c this is our starting place, all rotations are relative to the ionian mode
-  const modeRotationIndex = ionianScaleDegrees[modeIndex % ionianScaleDegrees.length]
+  const boundedModeIndex = (modeIndex % 7) < 0 ? 7 + (modeIndex % 7) : (modeIndex % 7)
+  const modeRotationIndex = ionianScaleDegrees[boundedModeIndex]
 
   const noteWheelStyle = { transform: `rotate(${(0 - noteIndex) * 30}deg)` }
   const modeWheelStyle = { transform: `rotate(${(0 - modeRotationIndex) * 30}deg)` }
