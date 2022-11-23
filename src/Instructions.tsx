@@ -59,7 +59,7 @@ export default function Instructions({ isOpen, close }: InstructionsProps) {
       </p>
       <p>
         Made with love and given freely and without ads. If you like our work please consider&nbsp;
-        <a href="https://paypal.me/aaronik" target="_blank">supporting us!</a> Thank you!
+        <a href="https://www.paypal.com/donate/?hosted_button_id=22EGXEL2CWHCN" target="_blank">supporting us!</a> Thank you!
       </p>
       <code>Copyright © Aaronik Jake MG 2022-present</code>
 
