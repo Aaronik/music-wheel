@@ -1,6 +1,7 @@
 import * as Tone from 'tone'
 import { useState } from 'react'
 import './App.css'
+import Footer from './Footer'
 
 const NOTES = [
   'C4', 'Db4', 'D4', 'Eb4', 'E4', 'F4', 'F#4', 'G4', 'Ab4', 'A4', 'Bb4', 'B4',
@@ -92,9 +93,6 @@ function App() {
     <div className="App">
       <div id='legend-container'><img src='legend.png' width={'80%'} /></div>
       <div id='instructions' onClick={() => setInstructionsVisible(false)} className={instructionsClassName}><img src='instructions.png' /></div>
-      <div id='help-buttons'>
-        <h2 onClick={() => setInstructionsVisible(!isInstructionsVisible)}>?</h2>
-      </div>
       <div id='wheel-buttons-container'>
         <div id='note-wheel-buttons' className='rotate-buttons' style={{ marginRight: '10px' }}>
           <h2>Select Key</h2>
@@ -121,6 +119,7 @@ function App() {
         <img style={noteWheelStyle} id='note-wheel' className='wheel rotatable' src='note-wheel.png' />
         <img style={modeWheelStyle} id='mode-wheel' className='wheel rotatable' src='mode-wheel.png' />
       </div>
+      <Footer onHelpClick={() => setInstructionsVisible(!isInstructionsVisible)}/>
     </div>
   )
 }
