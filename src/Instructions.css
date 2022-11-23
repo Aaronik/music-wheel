@@ -1,0 +1,27 @@
+#instructions {
+  font-size: 24px;
+  font-family: serif;
+  font-size: bold;
+  font-stretch: 100%;
+  font-style: normal; /* oblique, italic, oblique 40deg */
+  font-variant: common-ligatures;
+  line-height: 1.2em;
+  /* font: small-caps bold 24px/1.2 serif; */
+}
+
+#instructions h1 {
+  text-align: center;
+}
+
+#instructions a {
+  color: white;
+}
+
+.bold {
+  font-weight: bolder;
+}
+
+#instructions code {
+  font-size: 10px;
+  float: right;
+}

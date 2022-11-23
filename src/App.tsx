@@ -1,7 +1,9 @@
 import * as Tone from 'tone'
 import { useState } from 'react'
 import './App.css'
+import './Colors.css'
 import Footer from './Footer'
+import Instructions from './Instructions'
 
 const NOTES = [
   'C4', 'Db4', 'D4', 'Eb4', 'E4', 'F4', 'F#4', 'G4', 'Ab4', 'A4', 'Bb4', 'B4',
@@ -86,13 +88,10 @@ function App() {
     playNotes(toPlay, true)
   }
 
-  let instructionsClassName = 'modal'
-  if (!isInstructionsVisible) instructionsClassName += ' hidden'
-
   return (
     <div className="App">
       <div id='legend-container'><img src='legend.png' width={'80%'} /></div>
-      <div id='instructions' onClick={() => setInstructionsVisible(false)} className={instructionsClassName}><img src='instructions.png' /></div>
+      <Instructions isOpen={isInstructionsVisible} close={() => setInstructionsVisible(false)} />
       <div id='wheel-buttons-container'>
         <div id='note-wheel-buttons' className='rotate-buttons' style={{ marginRight: '10px' }}>
           <h2>Select Key</h2>

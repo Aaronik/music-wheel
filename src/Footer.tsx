@@ -1,11 +1,6 @@
 import React from "react"
 import "./Footer.css"
 
-// <div>
-//   <p>Copyright © Aaronik</p>
-//   <p>2022-present</p>
-// </div>
-
 // Just b/c at the time it was easier than styling <a> tags which is for some reason hard
 function ButtonAndLink(props: React.PropsWithChildren<{ url: string }>) {
   const onClick = () => window.open(props.url, '_blank')

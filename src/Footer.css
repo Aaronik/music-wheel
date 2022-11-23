@@ -1,9 +1,6 @@
 #footer-container {
-  /* background: purple; */
   position: static;
   width: 100%;
-  /* height: 5vh; */
-  /* bottom: 0; */
   display: flex;
   justify-content: space-between;
   align-items: center;
