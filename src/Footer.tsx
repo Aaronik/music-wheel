@@ -18,11 +18,11 @@ type FooterProps = {
   onHelpClick: () => void
 }
 
+      // <ButtonAndLink url="https://github.com/aaronik/music-wheel"><img id="github" src="github.png" /></ButtonAndLink>
 export default function Footer({ onHelpClick }: FooterProps) {
   return (
     <div id="footer-container">
       <button onClick={onHelpClick}>?</button>
-      <ButtonAndLink url="https://github.com/aaronik/music-wheel"><img id="github" src="github.png" /></ButtonAndLink>
       <ButtonAndLink url="https://www.paypal.com/donate/?hosted_button_id=22EGXEL2CWHCN">Donate</ButtonAndLink>
     </div>
   )

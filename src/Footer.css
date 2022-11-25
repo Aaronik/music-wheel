@@ -8,16 +8,9 @@
 }
 
 #footer-container button {
-  width: 33vw;
+  width: 50vw;
   border: 1px solid dimgrey;
   border-radius: 0;
-}
-
-#github {
-  /* For some reason the surrounding <a> gives a bunch of extra space on the bottom
-   * that I can't figure out how to get rid of */
-  margin-bottom: -4px;
-  opacity: 0.8;
 }
 
 #footer-container a {
