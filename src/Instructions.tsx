@@ -54,14 +54,14 @@ export default function Instructions({ isOpen, close }: InstructionsProps) {
         Mode indicates that the mode is diminished.
       </p>
       <p>
-        Created and Co-Designed by <span className="bold">Jake MG. </span>MasterJake1719@gmail.com<br />
+        Created and Co-Designed by <span className="bold">Jake Masterson. </span>MasterJake1719@gmail.com<br />
         Implemented and Co-Designed by <span className="bold"><a href="https://aaronik.com" target="_blank">Aaron Sullivan</a></span><br />
       </p>
       <p>
         Made with love and given freely and without ads. If you like our work please consider&nbsp;
         <a href="https://www.paypal.com/donate/?hosted_button_id=22EGXEL2CWHCN" target="_blank">supporting us!</a> Thank you!
       </p>
-      <code>Copyright © Aaronik Jake MG 2022-present</code>
+      <code>Copyright © Aaronik Jake Masterson 2022-present</code>
 
     </div>
   )
