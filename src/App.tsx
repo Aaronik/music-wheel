@@ -4,11 +4,18 @@ import './App.css'
 import './Colors.css'
 import Footer from './Footer'
 import Instructions from './Instructions'
+import Wheel from './Wheel'
+import WheelButtons from './WheelButtons'
+import Legend from './Legend'
 
 const NOTES = [
   'C4', 'Db4', 'D4', 'Eb4', 'E4', 'F4', 'F#4', 'G4', 'Ab4', 'A4', 'Bb4', 'B4',
   'C5', 'Db5', 'D5', 'Eb5', 'E5', 'F5', 'F#5', 'G5', 'Ab5', 'A5', 'Bb5', 'B5',
   'C6'
+]
+
+const MODES = [
+  'Ionian', 'Dorian', 'Phrygian', 'Lydian', 'Mixolydian', 'Aeolian', 'Locrian'
 ]
 
 // Just stepping up, this will help us to build up our scale down the line
@@ -34,9 +41,6 @@ function App() {
   const ionianScaleDegrees = [0, 2, 4, 5, 7, 9, 11] // B/c this is our starting place, all rotations are relative to the ionian mode
   const boundedModeIndex = (modeIndex % 7) < 0 ? 7 + (modeIndex % 7) : (modeIndex % 7)
   const modeRotationIndex = ionianScaleDegrees[boundedModeIndex]
-
-  const noteWheelStyle = { transform: `rotate(${(0 - noteIndex) * 30}deg)` }
-  const modeWheelStyle = { transform: `rotate(${(0 - modeRotationIndex) * 30}deg)` }
 
   // Create a mask we can apply to our notes to get the ones we want
   // Starts with Ionian because that's our wheel's starting position
@@ -90,35 +94,23 @@ function App() {
 
   return (
     <div className="App">
-      <div id='legend-container'><img src='legend.png' width={'80%'} /></div>
-      <Instructions isOpen={isInstructionsVisible} close={() => setInstructionsVisible(false)} />
-      <div id='wheel-buttons-container'>
-        <div id='note-wheel-buttons' className='rotate-buttons' style={{ marginRight: '10px' }}>
-          <h2>Select Key</h2>
-          <div>
-            <button onClick={incrementNoteRotation}>⇧</button>
-            <button onClick={decrementNoteRotation}>⇩</button>
-          </div>
-        </div>
-        <div id='mode-wheel-buttons' className='rotate-buttons'>
-          <h2>Select Mode</h2>
-          <div>
-            <button onClick={incrementModeRotation}>⇧</button>
-            <button onClick={decrementModeRotation}>⇩</button>
-          </div>
-        </div>
-      </div>
+      <WheelButtons {...{
+        incrementNoteRotation,
+        incrementModeRotation,
+        decrementNoteRotation,
+        decrementModeRotation,
+        root: NOTES[boundedNoteIndex].slice(0, -1),
+        mode: MODES[boundedModeIndex]
+      }} />
+      <Legend />
       <div id='play-buttons-container'>
         <button onClick={playScale}>🎧 Scale</button>
         <button onClick={playTriad}>🎧 Triad</button>
         <button onClick={playSeventh}>🎧 Seventh</button>
       </div>
-      <div id='wheel-container'>
-        <img id='quality-wheel' className='wheel' src='quality-wheel.png' />
-        <img style={noteWheelStyle} id='note-wheel' className='wheel rotatable' src='note-wheel.png' />
-        <img style={modeWheelStyle} id='mode-wheel' className='wheel rotatable' src='mode-wheel.png' />
-      </div>
+      <Wheel {...{noteIndex, modeRotationIndex}} />
       <Footer onHelpClick={() => setInstructionsVisible(!isInstructionsVisible)}/>
+      <Instructions isOpen={isInstructionsVisible} close={() => setInstructionsVisible(false)} />
     </div>
   )
 }

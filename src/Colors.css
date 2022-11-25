@@ -5,3 +5,11 @@
 .blue { color: #0080FF; }
 .indigo { color: #0000FF; }
 .violet { color: #8000FF; }
+
+.redbg { background-color: red; }
+.orangebg { background-color: orange; }
+.yellowbg { background-color: yellow; }
+.greenbg { background-color: green; }
+.bluebg { background-color: #0080FF; }
+.indigobg { background-color: #0000FF; }
+.violetbg { background-color: #8000FF; }

@@ -1,0 +1,40 @@
+#wheel-buttons-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+  width: 30%;
+}
+
+#wheel-buttons-container h2 {
+  margin-bottom: 0;
+}
+
+#wheel-buttons-container .arrow {
+  padding: 10px 20px;
+}
+
+.rotate-buttons-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid white;
+  margin: 0 5px;
+}
+.wheel-buttons {
+  text-align: center;
+}
+
+.rotate-buttons {
+  display: flex;
+  flex-direction: column;
+  z-index: 10; /* so they can be clicked even when corner of images are above them */
+}
+
+.rotate-buttons-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}

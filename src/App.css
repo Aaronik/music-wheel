@@ -11,33 +11,6 @@ body {
   justify-content: space-between;
 }
 
-#legend-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-#help-buttons h2 {
-  cursor: pointer;
-  font-size: 36px;
-  position: fixed;
-  bottom: 0;
-  left: 5%;
-  border-radius: 100%;
-  background-color: purple;
-  z-index: 20; /* Above wheels in case its some crazy dimensions and it fals on top of it */
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  transition: filter 0.2s;
-}
-
-#help-buttons h2:hover {
-  filter: brightness(150%);
-}
-
 #play-buttons-container {
   display: flex;
   flex-direction: row;
@@ -51,40 +24,6 @@ body {
 #play-buttons-container button {
   padding: 20px;
   font-size: 20px;
-}
-
-#wheel-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.wheel {
-  max-width: 99vw;
-  width: auto;
-  height: auto;
-}
-
-#note-wheel {
-  margin-top: calc(0px - min(821px, 99vw)); /* These hoops allow rendering on multiple screen sizes when wheel images are shrunk */
-}
-
-#mode-wheel {
-  margin-top: calc(0px - min(821px, 99vw));
-}
-
-.rotate-buttons {
-  display: flex;
-  flex-direction: row;
-  z-index: 10; /* so they can be clicked even when corner of images are above them */
-}
-
-#wheel-buttons-container {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-around;
-  width: 30%;
 }
 
 button {
@@ -106,10 +45,6 @@ button:active {
   color: black;
 }
 
-.rotatable {
-  transition: transform 0.3s;
-}
-
 .modal {
   background-color: black;
   z-index: 20;
@@ -123,34 +58,4 @@ button:active {
 
 .hidden {
   display: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
 }
