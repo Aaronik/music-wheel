@@ -11,8 +11,8 @@ type WheelButtonsProps = {
 
 export default function WheelButtons(props: WheelButtonsProps) {
   return (
-    <div id="wheel-buttons-container">
-      <div className="wheel-buttons" style={{ marginRight: "10px" }}>
+    <div id="wheel-buttons">
+      <div className="wheel-button-group" style={{ marginRight: "10px" }}>
         <h2>Root</h2>
         <div className="rotate-buttons-row">
           <button className="arrow" onClick={props.decrementNoteRotation}>⬅</button>
@@ -20,7 +20,7 @@ export default function WheelButtons(props: WheelButtonsProps) {
           <button className="arrow" onClick={props.incrementNoteRotation}>➡</button>
         </div>
       </div>
-      <div className="wheel-buttons">
+      <div className="wheel-button-group">
         <h2>Mode</h2>
         <div className="rotate-buttons-row">
           <button className="arrow" onClick={props.decrementModeRotation}>⬅</button>

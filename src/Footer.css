@@ -1,4 +1,4 @@
-#footer-container {
+#footer {
   position: static;
   width: 100%;
   display: flex;
@@ -7,13 +7,13 @@
   margin-top: 15px;
 }
 
-#footer-container button {
+#footer button {
   width: 50vw;
   border: 1px solid dimgrey;
   border-radius: 0;
 }
 
-#footer-container a {
+#footer a {
   text-decoration: none;
   color: white;
   font-size: x-large;

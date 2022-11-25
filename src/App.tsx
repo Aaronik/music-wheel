@@ -103,7 +103,7 @@ function App() {
         mode: MODES[boundedModeIndex]
       }} />
       <Legend />
-      <div id='play-buttons-container'>
+      <div id='play-buttons'>
         <button onClick={playScale}>🎧 Scale</button>
         <button onClick={playTriad}>🎧 Triad</button>
         <button onClick={playSeventh}>🎧 Seventh</button>

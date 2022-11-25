@@ -1,4 +1,4 @@
-#wheel-buttons-container {
+#wheel-buttons {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -6,11 +6,11 @@
   width: 30%;
 }
 
-#wheel-buttons-container h2 {
+#wheel-buttons h2 {
   margin-bottom: 0;
 }
 
-#wheel-buttons-container .arrow {
+#wheel-buttons .arrow {
   padding: 10px 20px;
 }
 
@@ -23,7 +23,7 @@
   border: 1px solid white;
   margin: 0 5px;
 }
-.wheel-buttons {
+.wheel-button-group {
   text-align: center;
 }
 
