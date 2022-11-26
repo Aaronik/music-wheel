@@ -121,7 +121,7 @@ function App() {
         incrementModeRotation,
         decrementNoteRotation,
         decrementModeRotation,
-        root: NOTES[boundedNoteIndex].slice(0, -1),
+        root: NOTES[boundedNoteIndex].slice(0, -1), // The note without the octave number
         mode: MODES[boundedModeIndex % 7]
       }} />
       <br />
