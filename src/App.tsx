@@ -9,6 +9,7 @@ import WheelButtons from './WheelButtons'
 import Legend from './Legend'
 import { MODES, NOTES } from './constants'
 import { Bit, Mode } from './types'
+import { shift } from './util'
 
 // Just stepping up, this will help us to build up our scale down the line
 const CHROMATIC_SCALE: number[] = []
@@ -21,6 +22,16 @@ for (let i = 0; i < 100; i++) {
 //   <button onClick={playTriad}>🎧 Triad</button>
 //   <button onClick={playSeventh}>🎧 Seventh</button>
 // </div>
+
+const ionianScaleDegrees = [
+  0, 2, 4, 5, 7, 9, 11, // first octave
+  12, 14, 16, 17, 19, 21, 23 // second octave
+] // B/c this is our starting place, all rotations are relative to the ionian mode
+
+const getBoundedModeIndex = (index: number) => {
+  const n = ionianScaleDegrees.length
+  return (index % n) < 0 ? n + (index % n) : (index % n)
+}
 
 function App() {
 
@@ -36,34 +47,18 @@ function App() {
   // See, if we just did mode index like note index, the modes would rotate by their 30 degrees
   // and look fine, but 5 times, the root note _would not be on a note_, and that's semantically
   // undefined. So by having this secondary index, we can skip indices that are undesirable.
-  const ionianScaleDegrees = [0, 2, 4, 5, 7, 9, 11] // B/c this is our starting place, all rotations are relative to the ionian mode
-  const boundedModeIndex = (modeIndex % 7) < 0 ? 7 + (modeIndex % 7) : (modeIndex % 7)
+  const boundedModeIndex = getBoundedModeIndex(modeIndex)
   const modeRotationIndex = ionianScaleDegrees[boundedModeIndex]
-
-  // Create a mask we can apply to our chromatic notes to get the ones we want
-  // Starts with Ionian because that's our wheel's starting position
-  const modeMask: Bit[] = [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]
-
-  // Translate our mode mask so it's the right mode
-  for (let i = 0; i < modeRotationIndex; i++) {
-    modeMask.push(modeMask.shift() as Bit)
-  }
-
-  // We always want to play the root note at the end
-  modeMask.push(1)
 
   // Get a bounded index so we don't run out of notes from our NOTES array
   const boundedNoteIndex = (noteIndex % 12) < 0 ? 12 + (noteIndex % 12) : (noteIndex % 12)
 
-  // Get all of the notes starting at our root note
-  const chromaticNotes = NOTES.slice(boundedNoteIndex, boundedNoteIndex + 13)
-  const notes = chromaticNotes.reduce((notes, note, index) => {
-    const bitMask = modeMask[index]
-    if (bitMask) { notes.push(note) }
-    return notes
-  }, [] as string[])
-
-  console.log('scale: ', notes)
+  const applyBitmaskToChromaticNoteList = (noteList: string[], bitMask: Bit[]) => {
+    return noteList.reduce((notes, note, index) => {
+      if (bitMask[index]) { notes.push(note) }
+      return notes
+    }, [] as string[])
+  }
 
   const playNotes = async (toPlay: string[], shouldPlayTogetherAfter = false) => {
     await Tone.start()
@@ -76,25 +71,48 @@ function App() {
     }
   }
 
-  const playScale = () => {
+  const generateNotesForModeIndex = (index: number) => {
+    // Create a mask we can apply to our chromatic notes to get the ones we want
+    // Starts with Ionian because that's our wheel's starting position
+    let bitMask: Bit[] = [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]
+
+    // We shifted it once to get to the mode that's selected on the wheel,
+    // now we shift again to get to the mode that's clicked on, which is at {index}
+    // location _relative to the mode selected on the wheel_.
+    const secondaryBoundedModeIndex = getBoundedModeIndex(modeIndex + index)
+    const secondaryModeRotationIndex = ionianScaleDegrees[secondaryBoundedModeIndex]
+
+    // Get our list of chromatic notes we want to work with, starting at the ROOT selected
+    // on the wheel
+    const chromaticStartIndex = secondaryModeRotationIndex + boundedNoteIndex
+    const chromaticNotes = NOTES.slice(chromaticStartIndex, chromaticStartIndex + 13)
+
+    // Shift the bitMask for the second rotation
+    shift(bitMask, secondaryModeRotationIndex)
+
+    // We always want to end on the octave
+    bitMask.push(1)
+
+    // Apply the bitmask to the chromatic notes
+    const notes = applyBitmaskToChromaticNoteList(chromaticNotes, bitMask)
+
+    return notes
+  }
+
+  const playScale = (index: number) => {
+    const notes = generateNotesForModeIndex(index)
     playNotes(notes)
   }
 
-  const playTriad = () => {
+  const playTriad = (index: number) => {
+    const notes = generateNotesForModeIndex(index)
     const toPlay = [notes[0], notes[2], notes[4]]
-    playNotes(toPlay, true)
-  }
-
-  const playSeventh = () => {
-    const toPlay = [notes[0], notes[2], notes[4], notes[6]]
     playNotes(toPlay, true)
   }
 
   // all the modes starting on the selected one
   const sortedModes = Array.from(MODES)
-  for (let i = 0; i < boundedModeIndex; i++) {
-    sortedModes.push(sortedModes.shift() as Mode)
-  }
+  shift(sortedModes, boundedModeIndex)
 
   return (
     <div className="App">
@@ -107,7 +125,7 @@ function App() {
         mode: MODES[boundedModeIndex]
       }} />
       <br />
-      <Legend {...{ sortedModes }} />
+      <Legend {...{ sortedModes, playScale, playTriad }} />
       <br />
       <Wheel {...{ noteIndex, modeRotationIndex }} />
       <br />

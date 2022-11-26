@@ -26,14 +26,24 @@ type LegendProps = {
   * @description These are what are displayed
   */
   sortedModes: Mode[]
+
+  /**
+  * @description Play the scale starting at {index} _relative to the first mode given in selectedModes_
+  */
+  playScale: (index: number) => void
+
+  /**
+  * @description Play the triad starting at {index} _relative to the first mode given in selectedModes_
+  */
+  playTriad: (index: number) => void
 }
 
 type Quality = 'major' | 'minor' | 'diminished'
 
-export default function Legend({ sortedModes }: LegendProps) {
-  const modeData = sortedModes.map(mode => {
+export default function Legend({ playScale, playTriad, sortedModes }: LegendProps) {
+  const modeData = sortedModes.map((mode, index) => {
     const str = (mode.split('').shift() as string).toUpperCase() + mode.slice(1, mode.length)
-    return <td key={mode} className={"mode-td " + modeClassNames[mode]}>{str}</td>
+    return <td key={mode} className={"mode-td " + modeClassNames[mode]} onClick={() => playScale(index)}>{str}</td>
   })
 
   const numerals: string[] = ["i", "ii", "iii", "iv", "v", "vi", "vii"]
@@ -48,7 +58,7 @@ export default function Legend({ sortedModes }: LegendProps) {
       case 'diminished': str = numeral + '°'; break;
     }
 
-    return <td key={numeral} className="numeral-td">{str}</td>
+    return <td key={numeral} className="numeral-td" onClick={() => playTriad(index)}>{str}</td>
   })
 
   const isWideScreen = window.innerWidth > window.innerHeight

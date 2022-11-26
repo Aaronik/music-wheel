@@ -8,14 +8,17 @@
   max-width: 99vw;
   width: auto;
   height: auto;
+  z-index: -30;
 }
 
 #note-wheel {
   margin-top: calc(0px - min(821px, 99vw)); /* These hoops allow rendering on multiple screen sizes when wheel images are shrunk */
+  z-index: -20;
 }
 
 #mode-wheel {
   margin-top: calc(0px - min(821px, 99vw));
+  z-index: -10;
 }
 
 .rotatable {
