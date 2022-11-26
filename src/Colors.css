@@ -6,10 +6,10 @@
 .indigo { color: #0000FF; }
 .violet { color: #8000FF; }
 
-.redbg { background-color: red; }
-.orangebg { background-color: orange; }
-.yellowbg { background-color: yellow; }
-.greenbg { background-color: green; }
-.bluebg { background-color: #0080FF; }
-.indigobg { background-color: #0000FF; }
-.violetbg { background-color: #8000FF; }
+.red-underline { border-bottom: 5px solid red; }
+.orange-underline { border-bottom: 5px solid orange; }
+.yellow-underline { border-bottom: 5px solid yellow; }
+.green-underline { border-bottom: 5px solid green; }
+.blue-underline { border-bottom: 5px solid #0080FF; }
+.indigo-underline { border-bottom: 5px solid #0000FF; }
+.violet-underline { border-bottom: 5px solid #8000FF; }

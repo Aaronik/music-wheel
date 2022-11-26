@@ -7,22 +7,20 @@ import Instructions from './Instructions'
 import Wheel from './Wheel'
 import WheelButtons from './WheelButtons'
 import Legend from './Legend'
-
-const NOTES = [
-  'C4', 'Db4', 'D4', 'Eb4', 'E4', 'F4', 'F#4', 'G4', 'Ab4', 'A4', 'Bb4', 'B4',
-  'C5', 'Db5', 'D5', 'Eb5', 'E5', 'F5', 'F#5', 'G5', 'Ab5', 'A5', 'Bb5', 'B5',
-  'C6'
-]
-
-const MODES = [
-  'Ionian', 'Dorian', 'Phrygian', 'Lydian', 'Mixolydian', 'Aeolian', 'Locrian'
-]
+import { MODES, NOTES } from './constants'
+import { Bit, Mode } from './types'
 
 // Just stepping up, this will help us to build up our scale down the line
 const CHROMATIC_SCALE: number[] = []
 for (let i = 0; i < 100; i++) {
   CHROMATIC_SCALE.push(i)
 }
+
+// <div id='play-buttons'>
+//   <button onClick={playScale}>🎧 Scale</button>
+//   <button onClick={playTriad}>🎧 Triad</button>
+//   <button onClick={playSeventh}>🎧 Seventh</button>
+// </div>
 
 function App() {
 
@@ -42,13 +40,13 @@ function App() {
   const boundedModeIndex = (modeIndex % 7) < 0 ? 7 + (modeIndex % 7) : (modeIndex % 7)
   const modeRotationIndex = ionianScaleDegrees[boundedModeIndex]
 
-  // Create a mask we can apply to our notes to get the ones we want
+  // Create a mask we can apply to our chromatic notes to get the ones we want
   // Starts with Ionian because that's our wheel's starting position
-  const modeMask = [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]
+  const modeMask: Bit[] = [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]
 
   // Translate our mode mask so it's the right mode
   for (let i = 0; i < modeRotationIndex; i++) {
-    modeMask.push(modeMask.shift() as number)
+    modeMask.push(modeMask.shift() as Bit)
   }
 
   // We always want to play the root note at the end
@@ -92,6 +90,12 @@ function App() {
     playNotes(toPlay, true)
   }
 
+  // all the modes starting on the selected one
+  const sortedModes = Array.from(MODES)
+  for (let i = 0; i < boundedModeIndex; i++) {
+    sortedModes.push(sortedModes.shift() as Mode)
+  }
+
   return (
     <div className="App">
       <WheelButtons {...{
@@ -102,14 +106,11 @@ function App() {
         root: NOTES[boundedNoteIndex].slice(0, -1),
         mode: MODES[boundedModeIndex]
       }} />
-      <Legend />
-      <div id='play-buttons'>
-        <button onClick={playScale}>🎧 Scale</button>
-        <button onClick={playTriad}>🎧 Triad</button>
-        <button onClick={playSeventh}>🎧 Seventh</button>
-      </div>
-      <Wheel {...{noteIndex, modeRotationIndex}} />
-      <Footer onHelpClick={() => setInstructionsVisible(!isInstructionsVisible)}/>
+      <br />
+      <Legend {...{ sortedModes }} />
+      <br />
+      <Wheel {...{ noteIndex, modeRotationIndex }} />
+      <Footer onHelpClick={() => setInstructionsVisible(!isInstructionsVisible)} />
       <Instructions isOpen={isInstructionsVisible} close={() => setInstructionsVisible(false)} />
     </div>
   )

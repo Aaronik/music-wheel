@@ -1,3 +1,27 @@
 #legend {
 }
 
+#legend table {
+  border-collapse: collapse;
+  max-width: 99vw;
+  table-layout: fixed;
+}
+
+#legend td {
+  padding: 1vw;
+  cursor: pointer;
+}
+
+.mode-td {
+  border-top: 1px solid dimgrey;
+  border-left: 1px solid dimgrey;
+  border-right: 1px solid dimgrey;
+}
+
+.numeral-td {
+  border: 1px solid dimgrey;
+}
+
+.fixed-width td {
+  width: 5em;
+}

@@ -2,6 +2,7 @@ body {
   background: black;
   color: white;
   overflow-x: clip; /* For some reason there's huge x scroll into nothingness */
+  width: 99vw;
 }
 
 .App {
@@ -58,4 +59,12 @@ button:active {
 
 .hidden {
   display: none;
+}
+
+.small-font {
+  font-size: small;
+}
+
+.large-font {
+  font-size: large;
 }

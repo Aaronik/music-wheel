@@ -6,12 +6,11 @@
   width: 30%;
 }
 
-#wheel-buttons h2 {
-  margin-bottom: 0;
+#wheel-buttons h4 {
+  margin-bottom: 1vh;
 }
 
 #wheel-buttons .arrow {
-  padding: 10px 20px;
 }
 
 .rotate-buttons-indicator {
@@ -20,11 +19,12 @@
   justify-content: space-around;
   padding: 10px;
   border-radius: 5px;
-  border: 1px solid white;
+  border: 1px solid dimgrey;
   margin: 0 5px;
 }
 .wheel-button-group {
   text-align: center;
+  max-width: 50vw;
 }
 
 .rotate-buttons {
