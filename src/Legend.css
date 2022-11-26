@@ -12,7 +12,7 @@
   border: 2px solid black;
   box-sizing: border-box;
   height: 5vh;
-  /* text-align: center; */
+  text-align: center;
 }
 
 #legend td:hover {
