@@ -60,14 +60,16 @@ function App() {
     }, [] as string[])
   }
 
-  const playNotes = async (toPlay: string[], shouldPlayTogetherAfter = false) => {
+  const playNotes = async (toPlay: string[], shouldPlayTogether = false) => {
     await Tone.start()
     const synth = new Tone.PolySynth(Tone.Synth).toDestination()
-    toPlay.forEach((note, index) => {
-      synth.triggerAttackRelease(note, "8n", Tone.now() + (index / 3))
-    })
-    if (shouldPlayTogetherAfter) {
-      synth.triggerAttackRelease(toPlay, "2n", Tone.now() + ((toPlay.length + 0.5) / 3))
+
+    if (shouldPlayTogether) {
+      synth.triggerAttackRelease(toPlay, "2n", Tone.now())
+    } else {
+      toPlay.forEach((note, index) => {
+        synth.triggerAttackRelease(note, "8n", Tone.now() + (index / 3))
+      })
     }
   }
 
