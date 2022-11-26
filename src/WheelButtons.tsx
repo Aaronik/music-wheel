@@ -14,7 +14,7 @@ export default function WheelButtons(props: WheelButtonsProps) {
 
   return (
     <div id="wheel-buttons">
-      <div className="wheel-button-group" style={{ marginRight: "10px" }}>
+      <div className="wheel-button-group">
         <h4>Root</h4>
         <div className="rotate-buttons-row">
           <button className="arrow" onClick={props.decrementNoteRotation}>&#8678;</button>

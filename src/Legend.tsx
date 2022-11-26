@@ -62,7 +62,7 @@ export default function Legend({ playScale, playTriad, sortedModes }: LegendProp
     return <td key={numeral} className="numeral-td" onClick={() => playTriad(index)}>{str}</td>
   })
 
-  const isWideScreen = window.innerWidth > window.innerHeight
+  const isWideScreen = window.innerWidth > window.innerHeight // Comes up false on jakes screen, which is correct
 
   return (
     <div id="legend">
