@@ -83,8 +83,9 @@ function App() {
     const secondaryModeRotationIndex = ionianScaleDegrees[secondaryBoundedModeIndex]
 
     // Get our list of chromatic notes we want to work with, starting at the ROOT selected
-    // on the wheel
-    const chromaticStartIndex = (secondaryModeRotationIndex + boundedNoteIndex) % 24
+    // on the wheel, and we need three octaves, one for the wheel, one for the legend row,
+    // and one for the whole scale
+    const chromaticStartIndex = (secondaryModeRotationIndex + boundedNoteIndex) % 36
     const chromaticNotes = NOTES.slice(chromaticStartIndex, chromaticStartIndex + 13)
 
     // Shift the bitMask for the second rotation
