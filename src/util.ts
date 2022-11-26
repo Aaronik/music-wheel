@@ -8,3 +8,11 @@ export const shift = (array: any[], degree: number) => {
     array.push(array.shift())
   }
 }
+
+/**
+* @description Just the first letter
+*/
+export const capitalize = (str: string) => {
+  return (str.split('').shift() as string).toUpperCase() + str.slice(1, str.length)
+}
+

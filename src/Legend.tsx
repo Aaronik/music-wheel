@@ -1,5 +1,6 @@
 import './Legend.css'
 import { Mode } from './types'
+import { capitalize } from './util'
 
 const modeQualities: { [mode in Mode]: Quality } = {
   'ionian': 'major',
@@ -42,7 +43,7 @@ type Quality = 'major' | 'minor' | 'diminished'
 
 export default function Legend({ playScale, playTriad, sortedModes }: LegendProps) {
   const modeData = sortedModes.map((mode, index) => {
-    const str = (mode.split('').shift() as string).toUpperCase() + mode.slice(1, mode.length)
+    const str = capitalize(mode)
     return <td key={mode} className={"mode-td " + modeClassNames[mode]} onClick={() => playScale(index)}>{str}</td>
   })
 
