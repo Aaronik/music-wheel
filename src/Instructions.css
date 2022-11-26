@@ -5,8 +5,7 @@
   font-stretch: 100%;
   font-style: normal; /* oblique, italic, oblique 40deg */
   font-variant: common-ligatures;
-  /* line-height: 1.5rem; */
-  /* font: small-caps bold 24px/1.2 serif; */
+  padding: 1vw;
 }
 
 #instructions h1 {
