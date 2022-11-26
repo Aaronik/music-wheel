@@ -11,6 +11,11 @@
 }
 
 #wheel-buttons .arrow {
+  background-color: #222;
+}
+
+#wheel-buttons .arrow:hover {
+  background-color: #333;
 }
 
 .rotate-buttons-indicator {
@@ -22,6 +27,7 @@
   border: 1px solid dimgrey;
   margin: 0 5px;
 }
+
 .wheel-button-group {
   text-align: center;
   max-width: 50vw;

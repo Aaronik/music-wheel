@@ -9,8 +9,13 @@
 
 #footer button {
   width: 50vw;
-  border: 1px solid dimgrey;
+  background-color: #222;
+  border: 2px solid black;
   border-radius: 0;
+}
+
+#footer button:hover {
+  background-color: #333;
 }
 
 #footer a {

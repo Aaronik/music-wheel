@@ -8,7 +8,7 @@ import Wheel from './Wheel'
 import WheelButtons from './WheelButtons'
 import Legend from './Legend'
 import { MODES, NOTES } from './constants'
-import { Bit, Mode } from './types'
+import { Bit } from './types'
 import { shift } from './util'
 
 // Just stepping up, this will help us to build up our scale down the line
@@ -84,7 +84,7 @@ function App() {
 
     // Get our list of chromatic notes we want to work with, starting at the ROOT selected
     // on the wheel
-    const chromaticStartIndex = secondaryModeRotationIndex + boundedNoteIndex
+    const chromaticStartIndex = (secondaryModeRotationIndex + boundedNoteIndex) % 24
     const chromaticNotes = NOTES.slice(chromaticStartIndex, chromaticStartIndex + 13)
 
     // Shift the bitMask for the second rotation
