@@ -122,7 +122,7 @@ function App() {
         decrementNoteRotation,
         decrementModeRotation,
         root: NOTES[boundedNoteIndex].slice(0, -1),
-        mode: MODES[boundedModeIndex]
+        mode: MODES[boundedModeIndex % 7]
       }} />
       <br />
       <Legend {...{ sortedModes, playScale, playTriad }} />
