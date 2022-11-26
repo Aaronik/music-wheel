@@ -3,6 +3,7 @@
 
 #legend table {
   border-collapse: collapse;
+  width: 1000px;
   max-width: 99vw;
   table-layout: fixed;
 }
@@ -11,6 +12,11 @@
   padding: 1vw;
   cursor: pointer;
 }
+
+/* /1* TODO Howta get this in there nice *1/ */
+/* #legend tr:first-child::before,tr:last-child::before { */
+/*   content: '🎧' */
+/* } */
 
 .mode-td {
   border-top: 1px solid dimgrey;

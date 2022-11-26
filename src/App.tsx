@@ -110,6 +110,7 @@ function App() {
       <Legend {...{ sortedModes }} />
       <br />
       <Wheel {...{ noteIndex, modeRotationIndex }} />
+      <br />
       <Footer onHelpClick={() => setInstructionsVisible(!isInstructionsVisible)} />
       <Instructions isOpen={isInstructionsVisible} close={() => setInstructionsVisible(false)} />
     </div>
