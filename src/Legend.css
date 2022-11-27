@@ -19,11 +19,6 @@
   background-color: #333;
 }
 
-/* /1* TODO Howta get this in there nice *1/ */
-/* #legend tr:first-child::before,tr:last-child::before { */
-/*   content: '🎧' */
-/* } */
-
 .fixed-width td {
   width: 5em;
 }
