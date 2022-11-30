@@ -48,6 +48,8 @@ const getBoundedModeIndex = (index: number, n: 7 | 15) => {
   return (index % n) < 0 ? n + (index % n) : (index % n)
 }
 
+let synth: Tone.PolySynth
+
 function App() {
 
   const [keyIndex, setKeyIndex] = useState(0)
@@ -76,8 +78,10 @@ function App() {
   }
 
   const playNotes = async (toPlay: string[], shouldPlayTogether = false) => {
-    await Tone.start()
-    const synth = new Tone.PolySynth(Tone.Synth).toDestination()
+    if (!synth) {
+      await Tone.start()
+      synth = new Tone.PolySynth(Tone.Synth).toDestination()
+    }
 
     if (shouldPlayTogether) {
       synth.triggerAttackRelease(toPlay, "2n", Tone.now())
