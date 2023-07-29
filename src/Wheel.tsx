@@ -1,4 +1,4 @@
-import "./Wheel.css"
+import "./Wheel.scss"
 
 type WheelProps = {
   keyIndex: number,
