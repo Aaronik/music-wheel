@@ -25,3 +25,47 @@
   transition: transform 0.3s;
 }
 
+
+
+
+/*** New CSS wheel stuff down here ***/
+
+.slice {
+  transition: fill 0.3s, filter 0.3s; /* Smooth transition for fill and shadow */
+}
+
+.slice {
+  cursor: pointer;
+  transition: fill 0.3s, filter 0.3s; /* Smooth transition for fill and shadow */
+  &:hover {
+    filter: drop-shadow(0 0 10px orange);
+  }
+}
+
+/* TODO: Update the CSS to apply hover effects to the new classes or identifiers for each section */
+
+.wheel-container {
+  padding: 1rem 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  --radius: 50vw; // 80% of the viewport width
+  height: var(--radius); // Adjust the height of the container to match the radius
+  width: var(--radius); // Adjust the width of the container to match the radius
+}
+
+$side-length: 30vh;
+$ring-color: lightgrey;
+
+.ring {
+  border: 2px solid $ring-color;
+  border-radius: 50%;
+  min-width: $side-length;
+  min-height: $side-length;
+  margin: 10px;
+}
+
+.ring-1-divider {
+  border-left: 1px solid $ring-color;
+  padding-left: 0px;
+}
