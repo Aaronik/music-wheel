@@ -153,7 +153,7 @@ function App() {
   const sortedModes = Array.from(MODES)
   shift(sortedModes, boundedWheelModeIndex)
 
-  const onNewWheelPage = window.location.pathname.includes('new-wheel');
+  const onNewWheelPage = window.location.search.includes('new-wheel');
 
   return (
     <div className="App">
