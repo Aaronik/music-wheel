@@ -5,6 +5,7 @@ import './Colors.css'
 import Footer from './Footer'
 import Instructions from './Instructions'
 import Wheel from './Wheel'
+import ImageWheel from './ImageWheel'
 import WheelButtons from './WheelButtons'
 import Legend from './Legend'
 import { MODES, NOTES } from './constants'
@@ -16,12 +17,6 @@ const CHROMATIC_SCALE: number[] = []
 for (let i = 0; i < 100; i++) {
   CHROMATIC_SCALE.push(i)
 }
-
-// <div id='play-buttons'>
-//   <button onClick={playScale}>🎧 Scale</button>
-//   <button onClick={playTriad}>🎧 Triad</button>
-//   <button onClick={playSeventh}>🎧 Seventh</button>
-// </div>
 
 // These are the numerical scale degrees of each mode
 // While these can probably be generated, the math is throwing me for a loop, so for
@@ -158,6 +153,8 @@ function App() {
   const sortedModes = Array.from(MODES)
   shift(sortedModes, boundedWheelModeIndex)
 
+  const onNewWheelPage = window.location.pathname.includes('new-wheel');
+
   return (
     <div className="App">
       <WheelButtons {...{
@@ -171,7 +168,11 @@ function App() {
       <br />
       <Legend {...{ sortedModes, playScale, playTriad }} />
       <br />
-      <Wheel {...{ keyIndex, modeRotationIndex: wheelModeRotationIndex }} />
+      {
+        onNewWheelPage
+          ? <Wheel {...{ keyIndex, modeRotationIndex: wheelModeRotationIndex }} />
+          : <ImageWheel {...{ keyIndex, modeRotationIndex: wheelModeRotationIndex }} />
+      }
       <br />
       <Footer onHelpClick={() => setInstructionsVisible(!isInstructionsVisible)} />
       <Instructions isOpen={isInstructionsVisible} close={() => setInstructionsVisible(false)} />
@@ -180,3 +181,10 @@ function App() {
 }
 
 export default App
+
+// <div id='play-buttons'>
+//   <button onClick={playScale}>🎧 Scale</button>
+//   <button onClick={playTriad}>🎧 Triad</button>
+//   <button onClick={playSeventh}>🎧 Seventh</button>
+// </div>
+
