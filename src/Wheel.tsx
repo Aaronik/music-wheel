@@ -100,11 +100,21 @@ function drawWheel(sections: Section[], opts: Opts) {
     const text = section.type + " " + index;
     ctx.font = "10px Arial"; // Set the font size and family
     ctx.fillStyle = "white"; // Set the text color
-    const textAngle = (startAngle + endAngle) / 2; // Calculate the angle at the center of the section
-    const textRadius = (startRadius + endRadius) / 2; // Set the radius for the text position
-    const textX = radius + textRadius * Math.cos(textAngle); // Calculate the X position of the text
-    const textY = radius + textRadius * Math.sin(textAngle); // Calculate the Y position of the text
-    ctx.fillText(text, textX, textY); // Draw the text on the canvas
+    // Calculate the midpoint angle and radius for the text position
+    const textMidpointAngle = (startAngle + endAngle) / 2;
+    const textMidpointRadius = (startRadius + endRadius) / 2;
+    // Calculate the X and Y position of the text
+    const textX = radius + textMidpointRadius * Math.cos(textMidpointAngle);
+    const textY = radius + textMidpointRadius * Math.sin(textMidpointAngle);
+    // Measure text width and adjust the position to center the text horizontally
+    const textWidth = ctx.measureText(text).width;
+    // Rotate the canvas context to align the text towards the center of the wheel
+    ctx.save(); // Save the current context state
+    ctx.translate(textX, textY); // Translate to the text position
+    ctx.rotate(textMidpointAngle + Math.PI / 2); // Rotate the context to align the text
+    // Draw the text on the canvas centered in the section
+    ctx.fillText(text, -textWidth / 2, parseInt(ctx.font) / 2); // Adjust for centered text
+    ctx.restore(); // Restore the context to its original state
   });
 }
 
