@@ -6,44 +6,58 @@ type WheelProps = {
   modeRotationIndex: number
 }
 
-export default function Wheel({ }: WheelProps) {
+export default function Wheel({ keyIndex, modeRotationIndex }: WheelProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const radius = 350;
 
-  const radius = 350; // Adjust as needed
-  const totalSlices = 12;
-  const circles = 3;
-  const spacingBetweenCircles = radius / 3; // Spacing between each additional circle
+  const _opts: Omit<Opts, 'canvas' | 'ctx'> = {
+    numSlices: 12,
+    radius: radius,
+    numRings: 3,
+    spacingBetweenRings: radius / 3,
+    keyIndex,
+    modeRotationIndex,
+  };
+
+  const sliceAngle = 2 * Math.PI / _opts.numSlices;
+  const halfSliceAngle = sliceAngle / 2;
+  const sections: Section[] = [];
+
+  for (let slice = 0; slice < _opts.numSlices; slice++) {
+    for (let ring = 0; ring < _opts.numRings; ring++) {
+      const sectionType = ring % 3 === 0 ? 'in' : ring % 3 === 1 ? 'note' : 'quality';
+
+      sections.push({
+        startAngle: slice * sliceAngle + halfSliceAngle,
+        endAngle: (slice + 1) * sliceAngle + halfSliceAngle,
+        startRadius: _opts.spacingBetweenRings * ring,
+        endRadius: _opts.spacingBetweenRings * (ring + 1),
+        type: sectionType // Add the section type to the section object
+      });
+    }
+  }
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const ctx = canvas?.getContext('2d');
+    if (!canvas || !ctx) return;
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const opts: Opts = {
-      totalSlices,
-      radius,
-      canvas,
-      ctx,
-      circles,
-      spacingBetweenCircles,
-    };
+    const opts: Opts = Object.assign(_opts, { canvas, ctx, });
 
     const boundMouseMoveHandler = (event: MouseEvent) => {
-      mouseMoveHandler(opts, drawWheel, addGlowToSection, event);
+      mouseMoveHandler(sections, opts, drawWheel, addGlowToSection, event);
     };
 
     canvas.addEventListener('mousemove', boundMouseMoveHandler);
 
     // Call the drawWheel function to draw the wheel on the canvas
-    drawWheel(opts);
+    drawWheel(sections, opts);
 
     // Cleanup event listener
     return () => {
       canvas.removeEventListener('mousemove', boundMouseMoveHandler);
     };
-  }, []); // Empty dependency array means this effect runs once on mount
+  }, [ keyIndex, modeRotationIndex ]);
 
   return (
     <div id="new-wheel" className="wheel-container">
@@ -53,34 +67,45 @@ export default function Wheel({ }: WheelProps) {
 }
 
 // Draw the wheel on the canvas
-function drawWheel(opts: Opts) {
-  const { ctx, totalSlices, radius, circles, spacingBetweenCircles } = opts;
-  const sliceAngle = 2 * Math.PI / totalSlices;
+function drawWheel(sections: Section[], opts: Opts) {
+  const { ctx, radius } = opts;
 
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-  // Now draw the slices on top of the rings
-  for (let i = 0; i < totalSlices; i++) {
-    const startAngle = i * sliceAngle;
-    const endAngle = (i + 1) * sliceAngle;
+  // Draw each section based on its properties, with rotation offset applied only to 'note' sections
+  sections.forEach((section, index) => {
+    // Calculate the rotation offset based on the keyIndex for 'note' sections and modeRotationIndex for 'in' sections
+    const rotationOffset = section.type === 'note' ? 2 * Math.PI * opts.keyIndex / opts.numSlices :
+                           section.type === 'in' ? 2 * Math.PI * opts.modeRotationIndex / opts.numSlices : 0;
 
+    // Adjust the start and end angles by the rotation offset if applicable
+    const { startRadius, endRadius } = section;
+    const startAngle = section.startAngle + rotationOffset;
+    const endAngle = section.endAngle + rotationOffset;
+
+    ctx.fillStyle = 'white';
     ctx.beginPath();
-    ctx.strokeStyle = 'white'; // Color of the additional circles
-    ctx.moveTo(radius, radius); // Move to the center
-    ctx.arc(radius, radius, radius, startAngle, endAngle); // Draw the arc
+    ctx.arc(radius, radius, endRadius, startAngle, endAngle); // Draw the outer arc
+    ctx.lineTo(radius + startRadius * Math.cos(endAngle), radius + startRadius * Math.sin(endAngle)); // Line to the inner arc
+    ctx.arc(radius, radius, startRadius, endAngle, startAngle, true); // Draw the inner arc backwards
+    ctx.lineTo(radius + endRadius * Math.cos(startAngle), radius + endRadius * Math.sin(startAngle)); // Line back to the start
     ctx.closePath();
 
-    // Alternate the fill color for each slice for visibility
+    // Fill in the section
+    ctx.fillStyle = 'black';
     ctx.fill();
-    ctx.stroke(); // Optional: add a stroke to the slice
-  }
+    ctx.stroke(); // Optional: add a stroke to the section
 
-  for (let i = 1; i <= circles; i++) {
-    ctx.beginPath();
-    ctx.strokeStyle = 'white'; // Color of the additional circles
-    ctx.arc(radius, radius, radius - (i * spacingBetweenCircles), 0, 2 * Math.PI);
-    ctx.stroke();
-  }
+    // Add index numbers to the sections. This is temporary.
+    const text = section.type + " " + index;
+    ctx.font = "10px Arial"; // Set the font size and family
+    ctx.fillStyle = "white"; // Set the text color
+    const textAngle = (startAngle + endAngle) / 2; // Calculate the angle at the center of the section
+    const textRadius = (startRadius + endRadius) / 2; // Set the radius for the text position
+    const textX = radius + textRadius * Math.cos(textAngle); // Calculate the X position of the text
+    const textY = radius + textRadius * Math.sin(textAngle); // Calculate the Y position of the text
+    ctx.fillText(text, textX, textY); // Draw the text on the canvas
+  });
 }
 
 // Function to add glow effect to a section
@@ -122,53 +147,43 @@ const isMouseOverSection = (section: Section, opts: Opts, mouseX: number, mouseY
 
 // Event listener for mouse move
 const mouseMoveHandler = (
+  sections: Section[],
   opts: Opts,
   drawWheel: Function,
   addGlowToSection: Function,
   event: MouseEvent,
 ) => {
-  const { canvas, totalSlices } = opts;
-  const sliceAngle = 2 * Math.PI / totalSlices;
+  const { canvas } = opts;
   const rect = canvas.getBoundingClientRect();
   const mouseX = event.clientX - rect.left;
   const mouseY = event.clientY - rect.top;
-  let hoveredSection = -1;
 
   let isHovered = false;
 
-  for (let slice = 0; slice < totalSlices; slice++) {
-    for (let circle = 0; circle < opts.circles; circle++) {
-      const section: Section = {
-        startAngle: slice * sliceAngle,
-        endAngle: (slice + 1) * sliceAngle,
-        startRadius: opts.spacingBetweenCircles * circle,
-        endRadius: opts.spacingBetweenCircles * (circle + 1)
-      }
-
-      if (isMouseOverSection(section, opts, mouseX, mouseY)) {
-        if (hoveredSection !== slice) {
-          hoveredSection = slice;
-          drawWheel(opts); // Redraw the wheel
-          addGlowToSection(opts, section); // Add glow effect
-        }
-        isHovered = true;
-        break;
-      }
+  // Main draw loop
+  for (let section of sections) {
+    if (isMouseOverSection(section, opts, mouseX, mouseY)) {
+      isHovered = true;
+      drawWheel(sections, opts); // Redraw the wheel
+      addGlowToSection(opts, section); // Add glow effect
+      break;
     }
   }
 
   if (!isHovered) {
-    drawWheel(opts); // Redraw the wheel without glow
+    drawWheel(sections, opts); // Redraw the wheel without glow
   }
 };
 
 type Opts = {
-  totalSlices: number;
+  numSlices: number;
   radius: number;
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
-  circles: number;
-  spacingBetweenCircles: number;
+  numRings: number;
+  spacingBetweenRings: number;
+  keyIndex: number;
+  modeRotationIndex: number;
 };
 
 type Section = {
@@ -176,5 +191,6 @@ type Section = {
   endAngle: number;
   startRadius: number;
   endRadius: number;
+  type: 'quality' | 'note' | 'in'
 }
 
