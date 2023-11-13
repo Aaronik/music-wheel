@@ -8,15 +8,13 @@ type WheelProps = {
 
 export default function Wheel({ keyRotationIndex, modeRotationIndex }: WheelProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const radius = 550;
+  const radius = window.innerWidth < window.innerHeight ? window.innerWidth / 2 : 550;
+  const textSize = window.innerWidth < window.innerHeight ? '1.3rem' : '2rem';
 
   const _opts: Omit<Opts, 'canvas' | 'ctx'> = {
+    radius, textSize, keyRotationIndex, modeRotationIndex,
     numSlices: 12,
-    radius: radius,
     ringSpacings: [radius / 1.7, radius / 1.2, radius / 1.1],
-    keyRotationIndex,
-    modeRotationIndex,
-    textSize: '2rem', // Set default text size
   };
 
   const sliceAngle = 2 * Math.PI / _opts.numSlices;

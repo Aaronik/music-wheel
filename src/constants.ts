@@ -1,4 +1,4 @@
-import { Mode, Root } from "./types"
+import { Mode } from "./types"
 
 export const MODES = [
   'ionian', 'dorian', 'phrygian', 'lydian', 'mixolydian', 'aeolian', 'locrian',
