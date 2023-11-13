@@ -13,8 +13,7 @@ export default function Wheel({ keyRotationIndex, modeRotationIndex }: WheelProp
   const _opts: Omit<Opts, 'canvas' | 'ctx'> = {
     numSlices: 12,
     radius: radius,
-    numRings: 3,
-    spacingBetweenRings: radius / 3,
+    ringSpacings: [radius / 1.5, radius / 1.2, radius / 1.1],
     keyRotationIndex,
     modeRotationIndex,
   };
@@ -24,13 +23,13 @@ export default function Wheel({ keyRotationIndex, modeRotationIndex }: WheelProp
   const sections: Section[] = [];
 
   for (let slice = 0; slice < _opts.numSlices; slice++) {
-    for (let ring = 0; ring < _opts.numRings; ring++) {
+    for (let ring = 0; ring < _opts.ringSpacings.length; ring++) {
       const sectionType = ring % 3 === 0 ? 'in' : ring % 3 === 1 ? 'note' : 'quality';
       sections.push({
         startAngle: slice * sliceAngle + halfSliceAngle,
         endAngle: (slice + 1) * sliceAngle + halfSliceAngle,
-        startRadius: _opts.spacingBetweenRings * ring,
-        endRadius: _opts.spacingBetweenRings * (ring + 1),
+        startRadius: ring === 0 ? 0 : _opts.ringSpacings[ring - 1],
+        endRadius: _opts.ringSpacings[ring],
         type: sectionType // Add the section type to the section object
       });
     }
@@ -186,8 +185,7 @@ type Opts = {
   radius: number;
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
-  numRings: number;
-  spacingBetweenRings: number;
+  ringSpacings: number[];
   keyRotationIndex: number;
   modeRotationIndex: number;
 };
