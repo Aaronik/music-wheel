@@ -9,7 +9,7 @@ type WheelProps = {
 export default function Wheel({ keyRotationIndex, modeRotationIndex }: WheelProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const radius = window.innerWidth < window.innerHeight ? window.innerWidth / 2 : 550;
-  const textSize = window.innerWidth < window.innerHeight ? '1.3rem' : '2rem';
+  const textSize = window.innerWidth < window.innerHeight ? 1.3 : 2;
 
   const _opts: Omit<Opts, 'canvas' | 'ctx'> = {
     radius, textSize, keyRotationIndex, modeRotationIndex,
@@ -113,7 +113,7 @@ function drawWheel(sections: Section[], opts: Opts, mouseX?: number, mouseY?: nu
     }
 
     // Set the font size from opts
-    ctx.font = `${opts.textSize} Arial`;
+    ctx.font = `${opts.textSize}rem Arial`;
     ctx.fillStyle = "white";
 
     // Calculate the midpoint angle and radius for the text position
@@ -130,11 +130,11 @@ function drawWheel(sections: Section[], opts: Opts, mouseX?: number, mouseY?: nu
     ctx.rotate(textMidpointAngle + Math.PI / 2); // Rotate the context to align the text
     // Draw the text on the canvas centered in the section with padding to the top
     const paddingTop = 10; // Adjust this value for more or less padding
-    ctx.fillText(section.text, -textWidth / 2, parseInt(opts.textSize) / 2 + paddingTop); // Adjust for centered text with padding
+    ctx.fillText(section.text, -textWidth / 2, opts.textSize / 2 + paddingTop); // Adjust for centered text with padding
 
     // If the section is on ring 1, draw a circle around the text
     if (section.ring === 1) {
-      const circleRadius = parseInt(opts.textSize) * 25; // Circle radius based on text size
+      const circleRadius = opts.textSize * 25; // Circle radius based on text size
       ctx.beginPath();
       ctx.arc(0, 0, circleRadius, 0, 2 * Math.PI);
       ctx.stroke();
@@ -211,7 +211,7 @@ type Opts = {
   ringSpacings: number[];
   keyRotationIndex: number;
   modeRotationIndex: number;
-  textSize: string; // Add textSize property
+  textSize: number;
 };
 
 type Section = {
