@@ -113,7 +113,9 @@ function drawWheel(sections: Section[], opts: Opts, mouseX?: number, mouseY?: nu
     }
 
     // Set the font size from opts
-    ctx.font = `${opts.textSize}rem Arial`;
+    // TODO Is it better with text size bigger for single char notes vs 4 char notes?
+    const textSize = opts.textSize * (section.type === 'note' && section.text.length === 1 ? 2 : 1);
+    ctx.font = `${textSize}rem Arial`;
     ctx.fillStyle = "white";
 
     // Calculate the midpoint angle and radius for the text position
@@ -129,7 +131,8 @@ function drawWheel(sections: Section[], opts: Opts, mouseX?: number, mouseY?: nu
     ctx.translate(textX, textY); // Translate to the text position
     ctx.rotate(textMidpointAngle + Math.PI / 2); // Rotate the context to align the text
     // Draw the text on the canvas centered in the section with padding to the top
-    const paddingTop = 10; // Adjust this value for more or less padding
+    // const paddingTop = 10; // Adjust this value for more or less padding
+    const paddingTop = section.type === 'note' && section.text.length === 1 ? 20 : 10;
     ctx.fillText(section.text, -textWidth / 2, opts.textSize / 2 + paddingTop); // Adjust for centered text with padding
 
     // If the section is on ring 1, draw a circle around the text
