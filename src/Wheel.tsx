@@ -8,14 +8,15 @@ type WheelProps = {
 
 export default function Wheel({ keyRotationIndex, modeRotationIndex }: WheelProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const radius = 350;
+  const radius = 550;
 
   const _opts: Omit<Opts, 'canvas' | 'ctx'> = {
     numSlices: 12,
     radius: radius,
-    ringSpacings: [radius / 1.5, radius / 1.2, radius / 1.1],
+    ringSpacings: [radius / 1.7, radius / 1.2, radius / 1.1],
     keyRotationIndex,
     modeRotationIndex,
+    textSize: '2rem', // Set default text size
   };
 
   const sliceAngle = 2 * Math.PI / _opts.numSlices;
@@ -25,12 +26,16 @@ export default function Wheel({ keyRotationIndex, modeRotationIndex }: WheelProp
   for (let slice = 0; slice < _opts.numSlices; slice++) {
     for (let ring = 0; ring < _opts.ringSpacings.length; ring++) {
       const sectionType = ring % 3 === 0 ? 'in' : ring % 3 === 1 ? 'note' : 'quality';
+      const text = ring == 2 ? QUALITIES[slice % _opts.numSlices] :
+                   ring == 1 ? DISPLAY_NOTES[slice % _opts.numSlices] : '';
+
       sections.push({
-        startAngle: slice * sliceAngle + halfSliceAngle,
-        endAngle: (slice + 1) * sliceAngle + halfSliceAngle,
+        ring, text,
+        startAngle: slice * sliceAngle - halfSliceAngle - Math.PI / 2,
+        endAngle: (slice + 1) * sliceAngle - halfSliceAngle - Math.PI / 2,
         startRadius: ring === 0 ? 0 : _opts.ringSpacings[ring - 1],
         endRadius: _opts.ringSpacings[ring],
-        type: sectionType // Add the section type to the section object
+        type: sectionType
       });
     }
   }
@@ -70,7 +75,7 @@ function drawWheel(sections: Section[], opts: Opts, mouseX?: number, mouseY?: nu
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
   // Draw each section based on its properties, with rotation offset applied only to 'note' sections
-  sections.forEach((section, index) => {
+  sections.forEach((section) => {
     // Calculate the rotation offset based on the keyRotationIndex for 'note' sections and modeRotationIndex for 'in' sections
     const rotationOffset = section.type === 'note' ? 2 * Math.PI * opts.keyRotationIndex / opts.numSlices :
                            section.type === 'in' ? 2 * Math.PI * opts.modeRotationIndex / opts.numSlices : 0;
@@ -92,9 +97,12 @@ function drawWheel(sections: Section[], opts: Opts, mouseX?: number, mouseY?: nu
     // Fill in the section
     ctx.fillStyle = 'black';
     ctx.fill();
-    ctx.strokeStyle = 'white'; // Set the stroke color to white
-    ctx.lineWidth = 2; // Set the stroke thickness to 2 pixels
-    ctx.stroke(); // Add a stroke to the section
+    // Only draw the stroke for the outermost ring
+    if (section.ring === opts.ringSpacings.length - 1) {
+      ctx.strokeStyle = 'white'; // Set the stroke color to white
+      ctx.lineWidth = 2; // Set the stroke thickness to 2 pixels
+      ctx.stroke(); // Add a stroke to the section
+    }
 
     // Check if the mouse is over the section and apply glow effect
     if (mouseX !== undefined && mouseY !== undefined && isMouseOverSection(section, opts, mouseX, mouseY)) {
@@ -106,11 +114,10 @@ function drawWheel(sections: Section[], opts: Opts, mouseX?: number, mouseY?: nu
       ctx.restore(); // Restore the state
     }
 
-    ctx.font = "16px Arial";
+    // Set the font size from opts
+    ctx.font = `${opts.textSize} Arial`;
     ctx.fillStyle = "white";
 
-    // Add index numbers to the sections. This is temporary.
-    const text = section.type + " " + index;
     // Calculate the midpoint angle and radius for the text position
     const textMidpointAngle = (startAngle + endAngle) / 2;
     const textMidpointRadius = (startRadius + endRadius) / 2;
@@ -118,13 +125,23 @@ function drawWheel(sections: Section[], opts: Opts, mouseX?: number, mouseY?: nu
     const textX = radius + textMidpointRadius * Math.cos(textMidpointAngle);
     const textY = radius + textMidpointRadius * Math.sin(textMidpointAngle);
     // Measure text width and adjust the position to center the text horizontally
-    const textWidth = ctx.measureText(text).width;
+    const textWidth = ctx.measureText(section.text).width;
     // Rotate the canvas context to align the text towards the center of the wheel
     ctx.save(); // Save the current context state
     ctx.translate(textX, textY); // Translate to the text position
     ctx.rotate(textMidpointAngle + Math.PI / 2); // Rotate the context to align the text
-    // Draw the text on the canvas centered in the section
-    ctx.fillText(text, -textWidth / 2, parseInt(ctx.font) / 2); // Adjust for centered text
+    // Draw the text on the canvas centered in the section with padding to the top
+    const paddingTop = 10; // Adjust this value for more or less padding
+    ctx.fillText(section.text, -textWidth / 2, parseInt(opts.textSize) / 2 + paddingTop); // Adjust for centered text with padding
+
+    // If the section is on ring 1, draw a circle around the text
+    if (section.ring === 1) {
+      const circleRadius = parseInt(opts.textSize) * 25; // Circle radius based on text size
+      ctx.beginPath();
+      ctx.arc(0, 0, circleRadius, 0, 2 * Math.PI);
+      ctx.stroke();
+    }
+
     ctx.restore(); // Restore the context to its original state
   });
 }
@@ -180,6 +197,14 @@ const mouseMoveHandler = (
   drawWheel(sections, opts, mouseX, mouseY);
 };
 
+const QUALITIES = [
+  'Root', 'm2', 'M2', 'm3', 'M3', '4', 'Tritone', '5', 'm6', 'M6', 'm7', 'M7',
+]
+
+const DISPLAY_NOTES = [
+  'C', 'C#Db', 'D', 'D#Eb', 'E', 'F', 'F#Gb', 'G', 'G#Ab', 'A', 'A#Bb', 'B'
+]
+
 type Opts = {
   numSlices: number;
   radius: number;
@@ -188,6 +213,7 @@ type Opts = {
   ringSpacings: number[];
   keyRotationIndex: number;
   modeRotationIndex: number;
+  textSize: string; // Add textSize property
 };
 
 type Section = {
@@ -195,6 +221,8 @@ type Section = {
   endAngle: number;
   startRadius: number;
   endRadius: number;
-  type: 'quality' | 'note' | 'in'
+  ring: number;
+  type: 'quality' | 'note' | 'in';
+  text: string;
 }
 
