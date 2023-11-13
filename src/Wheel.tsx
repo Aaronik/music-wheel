@@ -2,11 +2,11 @@ import { useRef, useEffect } from 'react';
 import "./Wheel.scss"
 
 type WheelProps = {
-  keyIndex: number,
+  keyRotationIndex: number,
   modeRotationIndex: number
 }
 
-export default function Wheel({ keyIndex, modeRotationIndex }: WheelProps) {
+export default function Wheel({ keyRotationIndex, modeRotationIndex }: WheelProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const radius = 350;
 
@@ -15,7 +15,7 @@ export default function Wheel({ keyIndex, modeRotationIndex }: WheelProps) {
     radius: radius,
     numRings: 3,
     spacingBetweenRings: radius / 3,
-    keyIndex,
+    keyRotationIndex,
     modeRotationIndex,
   };
 
@@ -26,7 +26,6 @@ export default function Wheel({ keyIndex, modeRotationIndex }: WheelProps) {
   for (let slice = 0; slice < _opts.numSlices; slice++) {
     for (let ring = 0; ring < _opts.numRings; ring++) {
       const sectionType = ring % 3 === 0 ? 'in' : ring % 3 === 1 ? 'note' : 'quality';
-
       sections.push({
         startAngle: slice * sliceAngle + halfSliceAngle,
         endAngle: (slice + 1) * sliceAngle + halfSliceAngle,
@@ -45,19 +44,18 @@ export default function Wheel({ keyIndex, modeRotationIndex }: WheelProps) {
     const opts: Opts = Object.assign(_opts, { canvas, ctx, });
 
     const boundMouseMoveHandler = (event: MouseEvent) => {
-      mouseMoveHandler(sections, opts, drawWheel, addGlowToSection, event);
+      mouseMoveHandler(sections, opts, drawWheel, event);
     };
 
     canvas.addEventListener('mousemove', boundMouseMoveHandler);
 
-    // Call the drawWheel function to draw the wheel on the canvas
     drawWheel(sections, opts);
 
     // Cleanup event listener
     return () => {
       canvas.removeEventListener('mousemove', boundMouseMoveHandler);
     };
-  }, [ keyIndex, modeRotationIndex ]);
+  }, [ keyRotationIndex, modeRotationIndex ]);
 
   return (
     <div id="new-wheel" className="wheel-container">
@@ -67,15 +65,15 @@ export default function Wheel({ keyIndex, modeRotationIndex }: WheelProps) {
 }
 
 // Draw the wheel on the canvas
-function drawWheel(sections: Section[], opts: Opts) {
+function drawWheel(sections: Section[], opts: Opts, mouseX?: number, mouseY?: number) {
   const { ctx, radius } = opts;
 
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
   // Draw each section based on its properties, with rotation offset applied only to 'note' sections
   sections.forEach((section, index) => {
-    // Calculate the rotation offset based on the keyIndex for 'note' sections and modeRotationIndex for 'in' sections
-    const rotationOffset = section.type === 'note' ? 2 * Math.PI * opts.keyIndex / opts.numSlices :
+    // Calculate the rotation offset based on the keyRotationIndex for 'note' sections and modeRotationIndex for 'in' sections
+    const rotationOffset = section.type === 'note' ? 2 * Math.PI * opts.keyRotationIndex / opts.numSlices :
                            section.type === 'in' ? 2 * Math.PI * opts.modeRotationIndex / opts.numSlices : 0;
 
     // Adjust the start and end angles by the rotation offset if applicable
@@ -83,6 +81,7 @@ function drawWheel(sections: Section[], opts: Opts) {
     const startAngle = section.startAngle + rotationOffset;
     const endAngle = section.endAngle + rotationOffset;
 
+    // Draw section outline
     ctx.fillStyle = 'white';
     ctx.beginPath();
     ctx.arc(radius, radius, endRadius, startAngle, endAngle); // Draw the outer arc
@@ -94,12 +93,25 @@ function drawWheel(sections: Section[], opts: Opts) {
     // Fill in the section
     ctx.fillStyle = 'black';
     ctx.fill();
-    ctx.stroke(); // Optional: add a stroke to the section
+    ctx.strokeStyle = 'white'; // Set the stroke color to white
+    ctx.lineWidth = 2; // Set the stroke thickness to 2 pixels
+    ctx.stroke(); // Add a stroke to the section
+
+    // Check if the mouse is over the section and apply glow effect
+    if (mouseX !== undefined && mouseY !== undefined && isMouseOverSection(section, opts, mouseX, mouseY)) {
+      ctx.save(); // Save the current state
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = 'orange';
+      ctx.fillStyle = 'orange';
+      ctx.fill();
+      ctx.restore(); // Restore the state
+    }
+
+    ctx.font = "16px Arial";
+    ctx.fillStyle = "white";
 
     // Add index numbers to the sections. This is temporary.
     const text = section.type + " " + index;
-    ctx.font = "10px Arial"; // Set the font size and family
-    ctx.fillStyle = "white"; // Set the text color
     // Calculate the midpoint angle and radius for the text position
     const textMidpointAngle = (startAngle + endAngle) / 2;
     const textMidpointRadius = (startRadius + endRadius) / 2;
@@ -118,23 +130,6 @@ function drawWheel(sections: Section[], opts: Opts) {
   });
 }
 
-// Function to add glow effect to a section
-const addGlowToSection = (opts: Opts, section: Section) => {
-  const { ctx, radius } = opts;
-  const { startAngle, endAngle, startRadius, endRadius } = section;
-
-  ctx.save(); // Save the current state
-  ctx.shadowBlur = 20;
-  ctx.shadowColor = 'orange';
-  ctx.beginPath();
-  ctx.arc(radius, radius, endRadius, startAngle, endAngle); // Draw the outer arc
-  ctx.arc(radius, radius, startRadius, endAngle, startAngle, true); // Draw the inner arc backwards
-  ctx.closePath();
-  ctx.fillStyle = 'orange';
-  ctx.fill();
-  ctx.restore(); // Restore the state
-};
-
 // Function to check if the mouse is over a section
 const isMouseOverSection = (section: Section, opts: Opts, mouseX: number, mouseY: number): boolean => {
   const { radius } = opts;
@@ -143,11 +138,26 @@ const isMouseOverSection = (section: Section, opts: Opts, mouseX: number, mouseY
   const angle = Math.atan2(y, x);
   const distance = Math.sqrt(x * x + y * y);
 
-  // Normalize the angle to be between 0 and 2*PI
-  const normalizedAngle = angle < 0 ? angle + 2 * Math.PI : angle;
+  // Calculate the rotation offset based on the section type and apply it to the section's start and end angles
+  const keyRotationOffset = 2 * Math.PI * opts.keyRotationIndex / opts.numSlices;
+  const modeRotationOffset = 2 * Math.PI * opts.modeRotationIndex / opts.numSlices;
+  const sectionStartAngle = section.startAngle + (section.type === 'note' ? keyRotationOffset : (section.type === 'in' ? modeRotationOffset : 0));
+  const sectionEndAngle = section.endAngle + (section.type === 'note' ? keyRotationOffset : (section.type === 'in' ? modeRotationOffset : 0));
 
-  // Check if the mouse is within the angle range of the section
-  const isWithinAngles = normalizedAngle >= section.startAngle && normalizedAngle <= section.endAngle;
+  // Normalize the angle to be between 0 and 2*PI
+  let normalizedAngle = (angle + 2 * Math.PI) % (2 * Math.PI);
+  // Normalize the section start and end angles to be between 0 and 2*PI
+  let normalizedSectionStartAngle = (sectionStartAngle + 2 * Math.PI) % (2 * Math.PI);
+  let normalizedSectionEndAngle = (sectionEndAngle + 2 * Math.PI) % (2 * Math.PI);
+  // Check if the angle is within the section's start and end angles, considering the possibility of crossing the 0 radians line
+  let isWithinAngles;
+  if (normalizedSectionEndAngle < normalizedSectionStartAngle) {
+    // The section crosses the 0 radians line
+    isWithinAngles = normalizedAngle >= normalizedSectionStartAngle || normalizedAngle <= normalizedSectionEndAngle;
+  } else {
+    // The section does not cross the 0 radians line
+    isWithinAngles = normalizedAngle >= normalizedSectionStartAngle && normalizedAngle <= normalizedSectionEndAngle;
+  }
 
   // Check if the mouse is within the radius range of the section
   const isWithinRadius = distance >= section.startRadius && distance <= section.endRadius;
@@ -160,7 +170,6 @@ const mouseMoveHandler = (
   sections: Section[],
   opts: Opts,
   drawWheel: Function,
-  addGlowToSection: Function,
   event: MouseEvent,
 ) => {
   const { canvas } = opts;
@@ -168,21 +177,8 @@ const mouseMoveHandler = (
   const mouseX = event.clientX - rect.left;
   const mouseY = event.clientY - rect.top;
 
-  let isHovered = false;
-
-  // Main draw loop
-  for (let section of sections) {
-    if (isMouseOverSection(section, opts, mouseX, mouseY)) {
-      isHovered = true;
-      drawWheel(sections, opts); // Redraw the wheel
-      addGlowToSection(opts, section); // Add glow effect
-      break;
-    }
-  }
-
-  if (!isHovered) {
-    drawWheel(sections, opts); // Redraw the wheel without glow
-  }
+  // Redraw the wheel with the current mouse position
+  drawWheel(sections, opts, mouseX, mouseY);
 };
 
 type Opts = {
@@ -192,7 +188,7 @@ type Opts = {
   ctx: CanvasRenderingContext2D;
   numRings: number;
   spacingBetweenRings: number;
-  keyIndex: number;
+  keyRotationIndex: number;
   modeRotationIndex: number;
 };
 

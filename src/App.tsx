@@ -47,12 +47,12 @@ let synth: Tone.PolySynth
 
 function App() {
 
-  const [keyIndex, setKeyIndex] = useState(0)
+  const [keyRotationIndex, setKeyRotationIndex] = useState(0)
   const [modeIndex, setModeIndex] = useState(0)
   const [isInstructionsVisible, setInstructionsVisible] = useState(false)
 
-  const incrementNoteRotation = () => setKeyIndex(keyIndex + 1)
-  const decrementNoteRotation = () => setKeyIndex(keyIndex - 1)
+  const incrementNoteRotation = () => setKeyRotationIndex(keyRotationIndex + 1)
+  const decrementNoteRotation = () => setKeyRotationIndex(keyRotationIndex - 1)
   const incrementModeRotation = () => setModeIndex(modeIndex + 1)
   const decrementModeRotation = () => setModeIndex(modeIndex - 1)
 
@@ -63,7 +63,7 @@ function App() {
   const wheelModeRotationIndex = modeScaleDegrees[0][boundedWheelModeIndex]
 
   // Get a bounded index so we don't run out of notes from our NOTES array
-  const boundedKeyIndex = (keyIndex % 12) < 0 ? 12 + (keyIndex % 12) : (keyIndex % 12)
+  const boundedKeyIndex = (keyRotationIndex % 12) < 0 ? 12 + (keyRotationIndex % 12) : (keyRotationIndex % 12)
 
   const applyBitmaskToChromaticNoteList = (noteList: string[], bitMask: Bit[]) => {
     return noteList.reduce((notes, note, index) => {
@@ -170,8 +170,8 @@ function App() {
       <br />
       {
         onNewWheelPage
-          ? <Wheel {...{ keyIndex, modeRotationIndex: wheelModeRotationIndex }} />
-          : <ImageWheel {...{ keyIndex, modeRotationIndex: wheelModeRotationIndex }} />
+          ? <Wheel {...{ keyRotationIndex, modeRotationIndex: wheelModeRotationIndex }} />
+          : <ImageWheel {...{ keyIndex: keyRotationIndex, modeRotationIndex: wheelModeRotationIndex }} />
       }
       <br />
       <Footer onHelpClick={() => setInstructionsVisible(!isInstructionsVisible)} />
