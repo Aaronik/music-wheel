@@ -3,6 +3,7 @@ body {
   color: white;
   overflow-x: clip; /* For some reason there's huge x scroll into nothingness */
   width: 100vw;
+  user-select: none;
 }
 
 .App {

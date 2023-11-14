@@ -8,7 +8,7 @@ import Wheel from './Wheel'
 import ImageWheel from './ImageWheel'
 import WheelButtons from './WheelButtons'
 import Legend from './Legend'
-import { MODES, NOTES } from './constants'
+import { MODES, Note, NOTES } from './constants'
 import { Bit } from './types'
 import { shift } from './util'
 
@@ -50,6 +50,7 @@ function App() {
   const [keyRotationIndex, setKeyRotationIndex] = useState(0)
   const [modeIndex, setModeIndex] = useState(0)
   const [isInstructionsVisible, setInstructionsVisible] = useState(false)
+  const [activeNotes, setActiveNotes] = useState<Note[]>([])
 
   const incrementNoteRotation = () => setKeyRotationIndex(keyRotationIndex + 1)
   const decrementNoteRotation = () => setKeyRotationIndex(keyRotationIndex - 1)
@@ -65,14 +66,14 @@ function App() {
   // Get a bounded index so we don't run out of notes from our NOTES array
   const boundedKeyIndex = (keyRotationIndex % 12) < 0 ? 12 + (keyRotationIndex % 12) : (keyRotationIndex % 12)
 
-  const applyBitmaskToChromaticNoteList = (noteList: string[], bitMask: Bit[]) => {
+  const applyBitmaskToChromaticNoteList = (noteList: Note[], bitMask: Bit[]): Note[] => {
     return noteList.reduce((notes, note, index) => {
       if (bitMask[index]) { notes.push(note) }
       return notes
-    }, [] as string[])
+    }, [] as Note[])
   }
 
-  const playNotes = async (toPlay: string[], shouldPlayTogether = false) => {
+  const playNotes = async (toPlay: Note[], shouldPlayTogether = false) => {
     if (!synth) {
       await Tone.start()
       synth = new Tone.PolySynth(Tone.Synth).toDestination()
@@ -80,10 +81,14 @@ function App() {
 
     if (shouldPlayTogether) {
       synth.triggerAttackRelease(toPlay, "2n", Tone.now())
+      setActiveNotes(toPlay)
+      setTimeout(() => setActiveNotes([]), 1000)
     } else {
       toPlay.forEach((note, index) => {
+        setTimeout(() => setActiveNotes([note]), (index / 3) * 1000);
         synth.triggerAttackRelease(note, "8n", Tone.now() + (index / 3))
       })
+      setTimeout(() => setActiveNotes([]), (toPlay.length / 3) * 1000);
     }
   }
 
@@ -94,7 +99,7 @@ function App() {
   * one from the left, this will be 1. It's decoupled from the mode that's selected on
   * the mode wheel.
   */
-  const generateNotesToPlay = (legendModeIndex: number) => {
+  const generateNotesToPlay = (legendModeIndex: number): Note[] => {
 
     // Create a mask we can apply to our chromatic notes to get the ones we want
     // Starts with Ionian because that's our wheel's starting position
@@ -115,16 +120,16 @@ function App() {
     const chromaticStartIndex = (legendRotationIndex + boundedKeyIndex) % 24
     const chromaticNotes = NOTES.slice(chromaticStartIndex, chromaticStartIndex + 13)
 
-    // The math here is totally not obvious, at least to me. So I'm going to leave these
-    // logs here for future troubleshooting / understanding.
-    console.clear()
-    console.log('A "rotation index" is how many chromatic notes from C.')
-    console.log("wheelModeScaleDegrees:", wheelModeScaleDegrees)
-    console.log("legendRotationIndex:", legendRotationIndex)
-    console.log("boundedKeyIndex:", boundedKeyIndex)
-    console.log("totalRotationIndex:", totalRotationIndex)
-    console.log("chromaticStartIndex:", chromaticStartIndex)
-    console.log('root note:', chromaticNotes[0])
+    // // The math here is totally not obvious, at least to me. So I'm going to leave these
+    // // logs here for future troubleshooting / understanding.
+    // console.clear()
+    // console.log('A "rotation index" is how many chromatic notes from C.')
+    // console.log("wheelModeScaleDegrees:", wheelModeScaleDegrees)
+    // console.log("legendRotationIndex:", legendRotationIndex)
+    // console.log("boundedKeyIndex:", boundedKeyIndex)
+    // console.log("totalRotationIndex:", totalRotationIndex)
+    // console.log("chromaticStartIndex:", chromaticStartIndex)
+    // console.log('root note:', chromaticNotes[0])
 
     // Shift the bitMask for the second rotation
     shift(bitMask, totalRotationIndex)
@@ -170,7 +175,7 @@ function App() {
       <br />
       {
         onNewWheelPage
-          ? <Wheel {...{ keyRotationIndex, modeRotationIndex: wheelModeRotationIndex }} />
+          ? <Wheel {...{ keyRotationIndex, modeRotationIndex: wheelModeRotationIndex, activeNotes }} />
           : <ImageWheel {...{ keyIndex: keyRotationIndex, modeRotationIndex: wheelModeRotationIndex }} />
       }
       <br />

@@ -15,7 +15,7 @@
   text-align: center;
 }
 
-#legend td:hover {
+#legend td:active {
   background-color: #333;
 }
 

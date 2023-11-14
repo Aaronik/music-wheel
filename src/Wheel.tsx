@@ -1,18 +1,20 @@
 import { useRef, useEffect } from 'react';
 import "./Wheel.scss"
+import { Note, NOTES } from './constants'
 
 type WheelProps = {
-  keyRotationIndex: number,
+  keyRotationIndex: number
   modeRotationIndex: number
+  activeNotes: Note[] // activeNote is now an array of Notes
 }
 
-export default function Wheel({ keyRotationIndex, modeRotationIndex }: WheelProps) {
+export default function Wheel({ keyRotationIndex, modeRotationIndex, activeNotes }: WheelProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const radius = window.innerWidth < window.innerHeight ? window.innerWidth / 2 : 500;
+  const radius = window.innerWidth < window.innerHeight ? window.innerWidth / 2 : 450;
   const textSize = window.innerWidth < window.innerHeight ? 1.3 : 2;
 
   const _opts: Omit<Opts, 'canvas' | 'ctx'> = {
-    radius, textSize, keyRotationIndex, modeRotationIndex,
+    radius, textSize, keyRotationIndex, modeRotationIndex, activeNotes,
     numSlices: 12,
     ringSpacings: [radius / 1.7, radius / 1.2, radius / 1.1],
   };
@@ -27,13 +29,26 @@ export default function Wheel({ keyRotationIndex, modeRotationIndex }: WheelProp
       const text = ring == 2 ? QUALITIES[slice % _opts.numSlices] :
         ring == 1 ? DISPLAY_NOTES[slice % _opts.numSlices] : '';
 
+      let color: string;
+      switch (slice) {
+        case 0: color = 'red'; break;
+        case 2: color = 'orange'; break;
+        case 4: color = 'yellow'; break;
+        case 5: color = 'green'; break;
+        case 7: color = 'teal'; break;
+        case 9: color = 'purple'; break;
+        case 11: color = 'magenta'; break;
+        default: color = 'black';
+      }
+
       sections.push({
-        ring, slice, text,
+        ring, slice, text, color,
         startAngle: slice * sliceAngle - halfSliceAngle - Math.PI / 2,
         endAngle: (slice + 1) * sliceAngle - halfSliceAngle - Math.PI / 2,
         startRadius: ring === 0 ? 0 : _opts.ringSpacings[ring - 1],
         endRadius: _opts.ringSpacings[ring],
-        type: sectionType
+        type: sectionType,
+        note: NOTES[slice]
       });
     }
   }
@@ -57,7 +72,7 @@ export default function Wheel({ keyRotationIndex, modeRotationIndex }: WheelProp
     return () => {
       canvas.removeEventListener('mousemove', boundMouseMoveHandler);
     };
-  }, [keyRotationIndex, modeRotationIndex]);
+  }, [keyRotationIndex, modeRotationIndex, activeNotes]); // activeNote is now activeNotes
 
   return (
     <div id="new-wheel" className="wheel-container">
@@ -68,7 +83,7 @@ export default function Wheel({ keyRotationIndex, modeRotationIndex }: WheelProp
 
 // Draw the wheel on the canvas
 function drawWheel(sections: Section[], opts: Opts, mouseX?: number, mouseY?: number) {
-  const { ctx, radius } = opts;
+  const { ctx, radius, activeNotes } = opts; // activeNote is now activeNotes
 
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
@@ -102,12 +117,13 @@ function drawWheel(sections: Section[], opts: Opts, mouseX?: number, mouseY?: nu
       ctx.stroke(); // Add a stroke to the section
     }
 
-    // Check if the mouse is over the section and apply glow effect
-    if (mouseX !== undefined && mouseY !== undefined && isMouseOverSection(section, opts, mouseX, mouseY)) {
+    // Check if the active note is being played or if the mouse is over the section and apply glow effect
+    const isActiveNote = section.type === 'note' && activeNotes.some(activeNote => activeNote.replace(/\d/g, '') === section.note.replace(/\d/g, ''));
+    if ((isActiveNote || (mouseX !== undefined && mouseY !== undefined && isMouseOverSection(section, opts, mouseX, mouseY))) && section.type === 'note') {
       ctx.save(); // Save the current state
-      ctx.shadowBlur = 20;
-      ctx.shadowColor = 'orange';
-      ctx.fillStyle = 'orange';
+      ctx.shadowBlur = isActiveNote ? 30 : 20; // Increase shadow blur if active note
+      ctx.shadowColor = isActiveNote ? section.color : 'orange';
+      ctx.fillStyle = isActiveNote ? section.color : 'orange';
       ctx.fill();
       ctx.restore(); // Restore the state
     }
@@ -149,26 +165,13 @@ function drawWheel(sections: Section[], opts: Opts, mouseX?: number, mouseY?: nu
 
     // Draw the lines
     if (section.type === 'in') {
-      let strokeStyle: string = '';
-
-      switch (section.slice) {
-        case 0: strokeStyle = 'red'; break;
-        case 2: strokeStyle = 'orange'; break;
-        case 4: strokeStyle = 'yellow'; break;
-        case 5: strokeStyle = 'green'; break;
-        case 7: strokeStyle = 'teal'; break;
-        case 9: strokeStyle = 'purple'; break;
-        case 11: strokeStyle = 'magenta'; break;
-        default: strokeStyle = 'black';
-      }
-
-      if (strokeStyle) {
+      if (section.color) {
         const startAngle = section.startAngle - (2 * Math.PI * opts.modeRotationIndex / opts.numSlices);
         const endRadius = section.endRadius;
         ctx.beginPath();
         ctx.moveTo(radius, radius); // Move to the center of the wheel
         ctx.lineTo(radius + endRadius * Math.cos(startAngle + Math.PI / opts.numSlices), radius + endRadius * Math.sin(startAngle + Math.PI / opts.numSlices)); // Line to the 'in' section
-        ctx.strokeStyle = strokeStyle; // Set the line color to red
+        ctx.strokeStyle = section.color;
         ctx.lineWidth = 5; // Set the line thickness
         ctx.stroke(); // Draw the line
       }
@@ -244,6 +247,7 @@ type Opts = {
   keyRotationIndex: number;
   modeRotationIndex: number;
   textSize: number;
+  activeNotes: Note[];
 };
 
 type Section = {
@@ -255,5 +259,7 @@ type Section = {
   slice: number;
   type: 'quality' | 'note' | 'in';
   text: string;
+  note: Note;
+  color: string;
 }
 
