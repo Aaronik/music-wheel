@@ -8,7 +8,7 @@ type WheelProps = {
 
 export default function Wheel({ keyRotationIndex, modeRotationIndex }: WheelProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const radius = window.innerWidth < window.innerHeight ? window.innerWidth / 2 : 550;
+  const radius = window.innerWidth < window.innerHeight ? window.innerWidth / 2 : 500;
   const textSize = window.innerWidth < window.innerHeight ? 1.3 : 2;
 
   const _opts: Omit<Opts, 'canvas' | 'ctx'> = {
@@ -75,8 +75,8 @@ function drawWheel(sections: Section[], opts: Opts, mouseX?: number, mouseY?: nu
   // Draw each section based on its properties, with rotation offset applied only to 'note' sections
   sections.forEach((section) => {
     // Calculate the rotation offset based on the keyRotationIndex for 'note' sections and modeRotationIndex for 'in' sections
-    const rotationOffset = section.type === 'note' ? 2 * Math.PI * opts.keyRotationIndex / opts.numSlices :
-      section.type === 'in' ? 2 * Math.PI * opts.modeRotationIndex / opts.numSlices : 0;
+    const rotationOffset = section.type === 'note' ? -2 * Math.PI * opts.keyRotationIndex / opts.numSlices :
+      section.type === 'in' ? -2 * Math.PI * opts.modeRotationIndex / opts.numSlices : 0;
 
     // Adjust the start and end angles by the rotation offset if applicable
     const { startRadius, endRadius } = section;
@@ -147,6 +147,7 @@ function drawWheel(sections: Section[], opts: Opts, mouseX?: number, mouseY?: nu
 
     ctx.restore(); // Restore the context to its original state
 
+    // Draw the lines
     if (section.type === 'in') {
       let strokeStyle: string = '';
 
@@ -162,8 +163,7 @@ function drawWheel(sections: Section[], opts: Opts, mouseX?: number, mouseY?: nu
       }
 
       if (strokeStyle) {
-        // Use modeRotationIndex instead of keyRotationIndex to rotate the lines with 'in' sections
-        const startAngle = section.startAngle + (2 * Math.PI * opts.modeRotationIndex / opts.numSlices);
+        const startAngle = section.startAngle - (2 * Math.PI * opts.modeRotationIndex / opts.numSlices);
         const endRadius = section.endRadius;
         ctx.beginPath();
         ctx.moveTo(radius, radius); // Move to the center of the wheel
@@ -174,58 +174,6 @@ function drawWheel(sections: Section[], opts: Opts, mouseX?: number, mouseY?: nu
       }
     }
   });
-
-  // // Draw a thick red line from the center of the wheel to the 'in' section
-  // const firstNoteSection = sections.find(section => section.type === 'in' && section.slice === 0);
-  // if (firstNoteSection) {
-  //   const startAngle = firstNoteSection.startAngle + (2 * Math.PI * opts.keyRotationIndex / opts.numSlices);
-  //   const endRadius = firstNoteSection.endRadius;
-  //   ctx.beginPath();
-  //   ctx.moveTo(radius, radius); // Move to the center of the wheel
-  //   ctx.lineTo(radius + endRadius * Math.cos(startAngle), radius + endRadius * Math.sin(startAngle)); // Line to the 'in' section
-  //   ctx.strokeStyle = 'red'; // Set the line color to red
-  //   ctx.lineWidth = 5; // Set the line thickness
-  //   ctx.stroke(); // Draw the line
-  // }
-
-  // // Draw a thick orange line from the center of the wheel to the third note
-  // const thirdNoteSection = sections.find(section => section.type === 'note' && section.text === DISPLAY_NOTES[2]);
-  // if (thirdNoteSection) {
-  //   const startAngle = thirdNoteSection.startAngle + (2 * Math.PI * opts.keyRotationIndex / opts.numSlices);
-  //   const endRadius = thirdNoteSection.endRadius;
-  //   ctx.beginPath();
-  //   ctx.moveTo(radius, radius); // Move to the center of the wheel
-  //   ctx.lineTo(radius + endRadius * Math.cos(startAngle), radius + endRadius * Math.sin(startAngle)); // Line to the third note
-  //   ctx.strokeStyle = 'orange'; // Set the line color to orange
-  //   ctx.lineWidth = 5; // Set the line thickness
-  //   ctx.stroke(); // Draw the line
-  // }
-
-  // // Draw a thick orange line from the center of the wheel to the third note
-  // const fourthNoteSection = sections.find(section => section.type === 'note' && section.text === DISPLAY_NOTES[3]);
-  // if (fourthNoteSection) {
-  //   const startAngle = fourthNoteSection.startAngle + (2 * Math.PI * opts.keyRotationIndex / opts.numSlices);
-  //   const endRadius = fourthNoteSection.endRadius;
-  //   ctx.beginPath();
-  //   ctx.moveTo(radius, radius); // Move to the center of the wheel
-  //   ctx.lineTo(radius + endRadius * Math.cos(startAngle), radius + endRadius * Math.sin(startAngle)); // Line to the third note
-  //   ctx.strokeStyle = 'yellow'; // Set the line color to orange
-  //   ctx.lineWidth = 5; // Set the line thickness
-  //   ctx.stroke(); // Draw the line
-  // }
-
-  // // Draw a thick orange line from the center of the wheel to the third note
-  // const fifthNoteSection = sections.find(section => section.type === 'note' && section.text === DISPLAY_NOTES[5]);
-  // if (fifthNoteSection) {
-  //   const startAngle = fifthNoteSection.startAngle + (2 * Math.PI * opts.keyRotationIndex / opts.numSlices);
-  //   const endRadius = fifthNoteSection.endRadius;
-  //   ctx.beginPath();
-  //   ctx.moveTo(radius, radius); // Move to the center of the wheel
-  //   ctx.lineTo(radius + endRadius * Math.cos(startAngle), radius + endRadius * Math.sin(startAngle)); // Line to the third note
-  //   ctx.strokeStyle = 'green'; // Set the line color to orange
-  //   ctx.lineWidth = 5; // Set the line thickness
-  //   ctx.stroke(); // Draw the line
-  // }
 }
 
 // Function to check if the mouse is over a section
