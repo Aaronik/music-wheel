@@ -25,7 +25,7 @@ export default function Wheel({ keyRotationIndex, modeRotationIndex, activeNotes
 
   for (let slice = 0; slice < _opts.numSlices; slice++) {
     for (let ring = 0; ring < _opts.ringSpacings.length; ring++) {
-      const sectionType = ring % 3 === 0 ? 'in' : ring % 3 === 1 ? 'note' : 'quality';
+      const sectionType = ring % 3 === 0 ? 'wedge' : ring % 3 === 1 ? 'note' : 'quality';
       const text = ring == 2 ? QUALITIES[slice % _opts.numSlices] :
         ring == 1 ? DISPLAY_NOTES[slice % _opts.numSlices] : '';
 
@@ -82,23 +82,24 @@ export default function Wheel({ keyRotationIndex, modeRotationIndex, activeNotes
 }
 
 // Draw the wheel on the canvas
-function drawWheel(sections: Section[], opts: Opts, mouseX?: number, mouseY?: number) {
+function drawWheel(sections: Section[], opts: Opts) {
   const { ctx, radius, activeNotes } = opts; // activeNote is now activeNotes
 
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
   // Draw each section based on its properties, with rotation offset applied only to 'note' sections
-  sections.forEach((section) => {
-    // Calculate the rotation offset based on the keyRotationIndex for 'note' sections and modeRotationIndex for 'in' sections
+  sections.forEach((section, index) => {
+    // Calculate the rotation offset based on the keyRotationIndex for 'note' sections and modeRotationIndex for 'wedge' sections
     const rotationOffset = section.type === 'note' ? -2 * Math.PI * opts.keyRotationIndex / opts.numSlices :
-      section.type === 'in' ? -2 * Math.PI * opts.modeRotationIndex / opts.numSlices : 0;
+      section.type === 'wedge' ? -2 * Math.PI * opts.modeRotationIndex / opts.numSlices : 0;
 
     // Adjust the start and end angles by the rotation offset if applicable
     const { startRadius, endRadius } = section;
     const startAngle = section.startAngle + rotationOffset;
     const endAngle = section.endAngle + rotationOffset;
 
-    // Draw section outline
+    // Section outline
+    ctx.save();
     ctx.fillStyle = 'white';
     ctx.beginPath();
     ctx.arc(radius, radius, endRadius, startAngle, endAngle); // Draw the outer arc
@@ -106,113 +107,86 @@ function drawWheel(sections: Section[], opts: Opts, mouseX?: number, mouseY?: nu
     ctx.arc(radius, radius, startRadius, endAngle, startAngle, true); // Draw the inner arc backwards
     ctx.lineTo(radius + endRadius * Math.cos(startAngle), radius + endRadius * Math.sin(startAngle)); // Line back to the start
     ctx.closePath();
+    ctx.restore();
 
-    // Fill in the section
+    // Section fill
+    ctx.save();
     ctx.fillStyle = 'black';
     ctx.fill();
-    // Only draw the stroke for the outermost ring
+
+    // Quality outline
     if (section.ring === opts.ringSpacings.length - 1) {
       ctx.strokeStyle = 'white'; // Set the stroke color to white
       ctx.lineWidth = 2; // Set the stroke thickness to 2 pixels
       ctx.stroke(); // Add a stroke to the section
     }
+    ctx.restore();
 
-    // Check if the active note is being played or if the mouse is over the section and apply glow effect
+    // Glow
     const isActiveNote = section.type === 'note' && activeNotes.some(activeNote => activeNote.replace(/\d/g, '') === section.note.replace(/\d/g, ''));
-    if ((isActiveNote || (mouseX !== undefined && mouseY !== undefined && isMouseOverSection(section, opts, mouseX, mouseY))) && section.type === 'note') {
+    if (isActiveNote) {
+      const wedgeIndex = ((section.slice - opts.keyRotationIndex) + opts.modeRotationIndex) % opts.numSlices;
+      const wedge = sections.filter(s => s.type === 'wedge')[wedgeIndex];
+      console.log("active section:", section, "wedgeIndex:", wedgeIndex, "wedge:", wedge)
+      const wedgeColor = wedge?.color || '';
       ctx.save(); // Save the current state
-      ctx.shadowBlur = isActiveNote ? 30 : 20; // Increase shadow blur if active note
-      ctx.shadowColor = isActiveNote ? section.color : 'orange';
-      ctx.fillStyle = isActiveNote ? section.color : 'orange';
+      ctx.shadowBlur = 30;
+      ctx.shadowColor = wedgeColor;
+      ctx.fillStyle = wedgeColor;
       ctx.fill();
       ctx.restore(); // Restore the state
     }
 
-    // Set the font size from opts
+    // Text ----- BEGIN -------
+    ctx.save();
     // TODO Is it better with text size bigger for single char notes vs 4 char notes?
     const textSize = opts.textSize * (section.type === 'note' && section.text.length === 1 ? 2 : 1);
-    ctx.font = `${textSize}rem Arial`;
-    ctx.fillStyle = "white";
-
-    // Calculate the midpoint angle and radius for the text position
     const textMidpointAngle = (startAngle + endAngle) / 2;
     const textMidpointRadius = (startRadius + endRadius) / 2;
-    // Calculate the X and Y position of the text
     const textX = radius + textMidpointRadius * Math.cos(textMidpointAngle);
     const textY = radius + textMidpointRadius * Math.sin(textMidpointAngle);
-    // Measure text width and adjust the position to center the text horizontally
-    const textWidth = ctx.measureText(section.text).width;
-    // Rotate the canvas context to align the text towards the center of the wheel
-    ctx.save(); // Save the current context state
+    const paddingTop = section.type === 'note' && section.text.length === 1 ? 20 : 10;
+
+    ctx.font = `${textSize}rem Arial`;
+    ctx.fillStyle = "white";
+    const textWidth = ctx.measureText(section.text).width; // Must be below font declaration
+
     ctx.translate(textX, textY); // Translate to the text position
     ctx.rotate(textMidpointAngle + Math.PI / 2); // Rotate the context to align the text
-    // Draw the text on the canvas centered in the section with padding to the top
-    // const paddingTop = 10; // Adjust this value for more or less padding
-    const paddingTop = section.type === 'note' && section.text.length === 1 ? 20 : 10;
     ctx.fillText(section.text, -textWidth / 2, opts.textSize / 2 + paddingTop); // Adjust for centered text with padding
 
-    // Draw a white circle around every note
+    // Draw the white circle around note names
     if (section.type === 'note') {
       const circleRadius = opts.textSize * 25; // Circle radius based on text size
+      ctx.save();
       ctx.beginPath();
       ctx.arc(0, 0, circleRadius, 0, 2 * Math.PI);
       ctx.strokeStyle = 'white'; // Set the circle color to white
       ctx.lineWidth = 2;
       ctx.stroke();
+      ctx.restore();
     }
 
-    ctx.restore(); // Restore the context to its original state
+    ctx.restore();
+    // Text ----- END -------
 
-    // Draw the lines
-    if (section.type === 'in') {
+    // Colored Lines
+    if (section.type === 'wedge') {
       if (section.color) {
         const startAngle = section.startAngle - (2 * Math.PI * opts.modeRotationIndex / opts.numSlices);
         const endRadius = section.endRadius;
+        ctx.save();
         ctx.beginPath();
         ctx.moveTo(radius, radius); // Move to the center of the wheel
-        ctx.lineTo(radius + endRadius * Math.cos(startAngle + Math.PI / opts.numSlices), radius + endRadius * Math.sin(startAngle + Math.PI / opts.numSlices)); // Line to the 'in' section
+        ctx.lineTo(radius + endRadius * Math.cos(startAngle + Math.PI / opts.numSlices), radius + endRadius * Math.sin(startAngle + Math.PI / opts.numSlices)); // Line to the 'wedge' section
         ctx.strokeStyle = section.color;
         ctx.lineWidth = 5; // Set the line thickness
         ctx.stroke(); // Draw the line
+        ctx.restore();
       }
     }
   });
 }
-
-// Function to check if the mouse is over a section
-const isMouseOverSection = (section: Section, opts: Opts, mouseX: number, mouseY: number): boolean => {
-  const { radius } = opts;
-  const x = mouseX - radius;
-  const y = mouseY - radius;
-  const angle = Math.atan2(y, x);
-  const distance = Math.sqrt(x * x + y * y);
-
-  // Calculate the rotation offset based on the section type and apply it to the section's start and end angles
-  const keyRotationOffset = 2 * Math.PI * opts.keyRotationIndex / opts.numSlices;
-  const modeRotationOffset = 2 * Math.PI * opts.modeRotationIndex / opts.numSlices;
-  const sectionStartAngle = section.startAngle + (section.type === 'note' ? keyRotationOffset : (section.type === 'in' ? modeRotationOffset : 0));
-  const sectionEndAngle = section.endAngle + (section.type === 'note' ? keyRotationOffset : (section.type === 'in' ? modeRotationOffset : 0));
-
-  // Normalize the angle to be between 0 and 2*PI
-  let normalizedAngle = (angle + 2 * Math.PI) % (2 * Math.PI);
-  // Normalize the section start and end angles to be between 0 and 2*PI
-  let normalizedSectionStartAngle = (sectionStartAngle + 2 * Math.PI) % (2 * Math.PI);
-  let normalizedSectionEndAngle = (sectionEndAngle + 2 * Math.PI) % (2 * Math.PI);
-  // Check if the angle is within the section's start and end angles, considering the possibility of crossing the 0 radians line
-  let isWithinAngles;
-  if (normalizedSectionEndAngle < normalizedSectionStartAngle) {
-    // The section crosses the 0 radians line
-    isWithinAngles = normalizedAngle >= normalizedSectionStartAngle || normalizedAngle <= normalizedSectionEndAngle;
-  } else {
-    // The section does not cross the 0 radians line
-    isWithinAngles = normalizedAngle >= normalizedSectionStartAngle && normalizedAngle <= normalizedSectionEndAngle;
-  }
-
-  // Check if the mouse is within the radius range of the section
-  const isWithinRadius = distance >= section.startRadius && distance <= section.endRadius;
-
-  return isWithinAngles && isWithinRadius;
-};
 
 // Event listener for mouse move
 const mouseMoveHandler = (
@@ -257,7 +231,7 @@ type Section = {
   endRadius: number;
   ring: number;
   slice: number;
-  type: 'quality' | 'note' | 'in';
+  type: 'quality' | 'note' | 'wedge';
   text: string;
   note: Note;
   color: string;
