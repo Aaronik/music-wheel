@@ -73,6 +73,28 @@ function App() {
     }, [] as Note[])
   }
 
+  console.log("(from App) activeNotes:", activeNotes)
+
+  // TODO This to util?
+  // Removes the first instance of each element of notesToRemove from notes. Returns what's left.
+  // If notesToRemove aren't in notes, ignore and move on.
+  const without = (notes: Note[], notesToRemove: Note[]): Note[] => {
+    notesToRemove = Array.from(notesToRemove);
+
+    return notes.map((note) => {
+      if (notesToRemove.includes(note)) {
+        // remove this instance of the note
+        notesToRemove.splice(notesToRemove.indexOf(note), 1);
+
+        // remove it from notes
+        notes.splice(notes.indexOf(note), 1);
+        return null
+      }
+
+      return note
+    }).filter(Boolean) as Note[]
+  }
+
   const playNotes = async (toPlay: Note[], shouldPlayTogether = false) => {
     if (!synth) {
       await Tone.start()
@@ -81,14 +103,14 @@ function App() {
 
     if (shouldPlayTogether) {
       synth.triggerAttackRelease(toPlay, "2n", Tone.now())
-      setActiveNotes(toPlay)
-      setTimeout(() => setActiveNotes([]), 1000)
+      setActiveNotes(activeNotes.concat(toPlay))
+      setTimeout(() => setActiveNotes(without(activeNotes, toPlay)), 1000)
     } else {
       toPlay.forEach((note, index) => {
         setTimeout(() => setActiveNotes([note]), (index / 3) * 1000);
         synth.triggerAttackRelease(note, "8n", Tone.now() + (index / 3))
       })
-      setTimeout(() => setActiveNotes([]), (toPlay.length / 3) * 1000);
+      setTimeout(() => setActiveNotes(without(activeNotes, toPlay)), (toPlay.length / 3) * 1000);
     }
   }
 
