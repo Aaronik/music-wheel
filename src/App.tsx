@@ -73,8 +73,6 @@ function App() {
     }, [] as Note[])
   }
 
-  console.log("(from App) activeNotes:", activeNotes)
-
   const addToActiveNotes = (notes: Note[]) => {
     setActiveNotes(prevNotes => {
       const newNotes = { ...prevNotes };

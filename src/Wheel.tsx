@@ -11,11 +11,14 @@ type WheelProps = {
 export default function Wheel({ keyRotationIndex, modeRotationIndex, activeNotes }: WheelProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const radius = window.innerWidth < window.innerHeight ? window.innerWidth / 2 : 450;
-  const textSize = window.innerWidth < window.innerHeight ? 1.3 : 2;
+  // const textSize = window.innerWidth < window.innerHeight ? 1.3 : 2;
+  const textSize = radius / 225;
+  const numSlices = 12;
 
   const _opts: Omit<Opts, 'canvas' | 'ctx'> = {
-    radius, textSize, keyRotationIndex, modeRotationIndex, activeNotes,
-    numSlices: 12,
+    radius, textSize, activeNotes, numSlices,
+    keyRotationIndex: keyRotationIndex % numSlices,
+    modeRotationIndex: modeRotationIndex % numSlices,
     ringSpacings: [radius / 1.7, radius / 1.2, radius / 1.1],
   };
 
@@ -125,9 +128,8 @@ function drawWheel(sections: Section[], opts: Opts) {
     // Glow
     const isActiveNote = section.type === 'note' && activeNotes.some(activeNote => activeNote.replace(/\d/g, '') === section.note.replace(/\d/g, ''));
     if (isActiveNote) {
-      const wedgeIndex = ((section.slice - opts.keyRotationIndex) + opts.modeRotationIndex) % opts.numSlices;
+      const wedgeIndex = (((section.slice - opts.keyRotationIndex) + opts.modeRotationIndex) % opts.numSlices + opts.numSlices) % opts.numSlices;
       const wedge = sections.filter(s => s.type === 'wedge')[wedgeIndex];
-      console.log("active section:", section, "wedgeIndex:", wedgeIndex, "wedge:", wedge)
       const wedgeColor = wedge?.color || '';
       ctx.save(); // Save the current state
       ctx.shadowBlur = 30;
@@ -145,7 +147,7 @@ function drawWheel(sections: Section[], opts: Opts) {
     const textMidpointRadius = (startRadius + endRadius) / 2;
     const textX = radius + textMidpointRadius * Math.cos(textMidpointAngle);
     const textY = radius + textMidpointRadius * Math.sin(textMidpointAngle);
-    const paddingTop = section.type === 'note' && section.text.length === 1 ? 20 : 10;
+    const paddingTop = section.type === 'note' && section.text.length === 1 ? radius / 23 : radius / 45;
 
     ctx.font = `${textSize}rem Arial`;
     ctx.fillStyle = "white";
