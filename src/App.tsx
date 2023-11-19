@@ -50,7 +50,7 @@ function App() {
   const [keyRotationIndex, setKeyRotationIndex] = useState(0)
   const [modeIndex, setModeIndex] = useState(0)
   const [isInstructionsVisible, setInstructionsVisible] = useState(false)
-  const [activeNotes, setActiveNotes] = useState<Note[]>([])
+  const [activeNotes, setActiveNotes] = useState<{ [note: string]: number }>({})
 
   const incrementNoteRotation = () => setKeyRotationIndex(keyRotationIndex + 1)
   const decrementNoteRotation = () => setKeyRotationIndex(keyRotationIndex - 1)
@@ -75,143 +75,130 @@ function App() {
 
   console.log("(from App) activeNotes:", activeNotes)
 
-  // TODO This to util?
-  // Removes the first instance of each element of notesToRemove from notes. Returns what's left.
-  // If notesToRemove aren't in notes, ignore and move on.
-  const without = (notes: Note[], notesToRemove: Note[]): Note[] => {
-    notesToRemove = Array.from(notesToRemove);
+  const addToActiveNotes = (notes: Note[]) => {
+    setActiveNotes(prevNotes => {
+      const newNotes = { ...prevNotes };
+      notes.forEach(note => {
+        newNotes[note] = (newNotes[note] || 0) + 1;
+      });
+      return newNotes;
+    })
+  };
 
-    return notes.map((note) => {
-      if (notesToRemove.includes(note)) {
-        // remove this instance of the note
-        notesToRemove.splice(notesToRemove.indexOf(note), 1);
-
-        // remove it from notes
-        notes.splice(notes.indexOf(note), 1);
-        return null
-      }
-
-      return note
-    }).filter(Boolean) as Note[]
+  const removeFromAciveNotes = (notes: Note[]) => {
+    setActiveNotes(prevNotes => {
+      const newNotes = { ...prevNotes };
+      notes.forEach(note => {
+        if (newNotes[note] > 1) {
+          newNotes[note] -= 1;
+        } else {
+          delete newNotes[note];
+        }
+      });
+      return newNotes;
+    })
   }
 
   const playNotes = async (toPlay: Note[], shouldPlayTogether = false) => {
-    if (!synth) {
-      await Tone.start()
-      synth = new Tone.PolySynth(Tone.Synth).toDestination()
-    }
-
-    if (shouldPlayTogether) {
-      synth.triggerAttackRelease(toPlay, "2n", Tone.now())
-      setActiveNotes(activeNotes.concat(toPlay))
-      setTimeout(() => setActiveNotes(without(activeNotes, toPlay)), 1000)
-    } else {
-      toPlay.forEach((note, index) => {
-        setTimeout(() => setActiveNotes([note]), (index / 3) * 1000);
-        synth.triggerAttackRelease(note, "8n", Tone.now() + (index / 3))
-      })
-      setTimeout(() => setActiveNotes(without(activeNotes, toPlay)), (toPlay.length / 3) * 1000);
-    }
-  }
-
-  /**
-  * @description
-  *
-  * @param {number} legendModeIndex This is the index within the legend row. So if you play the 2nd
-  * one from the left, this will be 1. It's decoupled from the mode that's selected on
-  * the mode wheel.
-  */
-  const generateNotesToPlay = (legendModeIndex: number): Note[] => {
-
-    // Create a mask we can apply to our chromatic notes to get the ones we want
-    // Starts with Ionian because that's our wheel's starting position
-    let bitMask: Bit[] = [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]
-
-    // How many hops down the routation indices are we going to go
-    const totalModeIndex = legendModeIndex + boundedWheelModeIndex
-
-    // The scale degrees for the mode the wheel currently has selected
-    const wheelModeScaleDegrees = modeScaleDegrees[boundedWheelModeIndex]
-
-    const legendRotationIndex = wheelModeScaleDegrees[legendModeIndex]
-    const boundedTotalModeIndex = getBoundedModeIndex(totalModeIndex, 7)
-    const totalRotationIndex = modeScaleDegrees[0][boundedTotalModeIndex]
-
-    // Get our list of chromatic notes we want to work with, starting at the ROOT selected
-    // on the wheel.
-    const chromaticStartIndex = (legendRotationIndex + boundedKeyIndex) % 24
-    const chromaticNotes = NOTES.slice(chromaticStartIndex, chromaticStartIndex + 13)
-
-    // // The math here is totally not obvious, at least to me. So I'm going to leave these
-    // // logs here for future troubleshooting / understanding.
-    // console.clear()
-    // console.log('A "rotation index" is how many chromatic notes from C.')
-    // console.log("wheelModeScaleDegrees:", wheelModeScaleDegrees)
-    // console.log("legendRotationIndex:", legendRotationIndex)
-    // console.log("boundedKeyIndex:", boundedKeyIndex)
-    // console.log("totalRotationIndex:", totalRotationIndex)
-    // console.log("chromaticStartIndex:", chromaticStartIndex)
-    // console.log('root note:', chromaticNotes[0])
-
-    // Shift the bitMask for the second rotation
-    shift(bitMask, totalRotationIndex)
-
-    // We always want to end on the octave
-    bitMask.push(1)
-
-    // Apply the bitmask to the chromatic notes
-    const notes = applyBitmaskToChromaticNoteList(chromaticNotes, bitMask)
-
-    return notes
-  }
-
-  const playScale = (index: number) => {
-    const notes = generateNotesToPlay(index)
-    playNotes(notes)
-  }
-
-  const playTriad = (index: number) => {
-    const notes = generateNotesToPlay(index)
-    const toPlay = [notes[0], notes[2], notes[4]]
-    playNotes(toPlay, true)
-  }
-
-  // all the modes starting on the selected one
-  const sortedModes = Array.from(MODES)
-  shift(sortedModes, boundedWheelModeIndex)
-
-  const onNewWheelPage = window.location.search.includes('new-wheel');
-
-  return (
-    <div className="App">
-      <WheelButtons {...{
-        incrementNoteRotation,
-        incrementModeRotation,
-        decrementNoteRotation,
-        decrementModeRotation,
-        root: NOTES[boundedKeyIndex].slice(0, -1), // The note without the octave number
-        mode: MODES[boundedWheelModeIndex % 7]
-      }} />
-      <br />
-      <Legend {...{ sortedModes, playScale, playTriad }} />
-      <br />
-      {
-        onNewWheelPage
-          ? <Wheel {...{ keyRotationIndex, modeRotationIndex: wheelModeRotationIndex, activeNotes }} />
-          : <ImageWheel {...{ keyIndex: keyRotationIndex, modeRotationIndex: wheelModeRotationIndex }} />
+      if (!synth) {
+        await Tone.start()
+        synth = new Tone.PolySynth(Tone.Synth).toDestination()
       }
-      <br />
-      <Footer onHelpClick={() => setInstructionsVisible(!isInstructionsVisible)} />
-      <Instructions isOpen={isInstructionsVisible} close={() => setInstructionsVisible(false)} />
-    </div>
-  )
-}
 
-export default App
+      if (shouldPlayTogether) {
+        synth.triggerAttackRelease(toPlay, "2n", Tone.now())
+        addToActiveNotes(toPlay);
+        setTimeout(() => removeFromAciveNotes(toPlay), 1000);
+      } else {
+        toPlay.forEach((note, index) => {
+          synth.triggerAttackRelease(note, "8n", Tone.now() + (index / 3))
+          setTimeout(() => addToActiveNotes([note]), (index / 3) * 1000);
+          setTimeout(() => removeFromAciveNotes([note]), ((index + 1) / 3) * 1000);
+        })
+      }
+    }
 
-// <div id='play-buttons'>
-//   <button onClick={playScale}>🎧 Scale</button>
-//   <button onClick={playTriad}>🎧 Triad</button>
-//   <button onClick={playSeventh}>🎧 Seventh</button>
-// </div>
+    /**
+    * @description
+    *
+    * @param {number} legendModeIndex This is the index within the legend row. So if you play the 2nd
+    * one from the left, this will be 1. It's decoupled from the mode that's selected on
+    * the mode wheel.
+    */
+    const generateNotesToPlay = (legendModeIndex: number): Note[] => {
+
+      // Create a mask we can apply to our chromatic notes to get the ones we want
+      // Starts with Ionian because that's our wheel's starting position
+      let bitMask: Bit[] = [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]
+
+      // How many hops down the routation indices are we going to go
+      const totalModeIndex = legendModeIndex + boundedWheelModeIndex
+
+      // The scale degrees for the mode the wheel currently has selected
+      const wheelModeScaleDegrees = modeScaleDegrees[boundedWheelModeIndex]
+
+      const legendRotationIndex = wheelModeScaleDegrees[legendModeIndex]
+      const boundedTotalModeIndex = getBoundedModeIndex(totalModeIndex, 7)
+      const totalRotationIndex = modeScaleDegrees[0][boundedTotalModeIndex]
+
+      // Get our list of chromatic notes we want to work with, starting at the ROOT selected
+      // on the wheel.
+      const chromaticStartIndex = (legendRotationIndex + boundedKeyIndex) % 24
+      const chromaticNotes = NOTES.slice(chromaticStartIndex, chromaticStartIndex + 13)
+
+      // Shift the bitMask for the second rotation
+      shift(bitMask, totalRotationIndex)
+
+      // We always want to end on the octave
+      bitMask.push(1)
+
+      // Apply the bitmask to the chromatic notes
+      const notes = applyBitmaskToChromaticNoteList(chromaticNotes, bitMask)
+
+      return notes
+    }
+
+    const playScale = (index: number) => {
+      const notes = generateNotesToPlay(index)
+      playNotes(notes)
+    }
+
+    const playTriad = (index: number) => {
+      const notes = generateNotesToPlay(index)
+      const toPlay = [notes[0], notes[2], notes[4]]
+      playNotes(toPlay, true)
+    }
+
+    // all the modes starting on the selected one
+    const sortedModes = Array.from(MODES)
+    shift(sortedModes, boundedWheelModeIndex)
+
+    const onNewWheelPage = window.location.search.includes('new-wheel');
+
+    return (
+      <div className="App">
+        <WheelButtons {...{
+          incrementNoteRotation,
+          incrementModeRotation,
+          decrementNoteRotation,
+          decrementModeRotation,
+          root: NOTES[boundedKeyIndex].slice(0, -1), // The note without the octave number
+          mode: MODES[boundedWheelModeIndex % 7]
+        }} />
+        <br />
+        <Legend {...{ sortedModes, playScale, playTriad }} />
+        <br />
+        {
+          onNewWheelPage
+            ? <Wheel {...{ keyRotationIndex, modeRotationIndex: wheelModeRotationIndex, activeNotes: Object.keys(activeNotes) as Note[] }} />
+            : <ImageWheel {...{ keyIndex: keyRotationIndex, modeRotationIndex: wheelModeRotationIndex }} />
+        }
+        <br />
+        <Footer onHelpClick={() => setInstructionsVisible(!isInstructionsVisible)} />
+        <Instructions isOpen={isInstructionsVisible} close={() => setInstructionsVisible(false)} />
+      </div>
+    )
+  }
+
+  export default App
 
